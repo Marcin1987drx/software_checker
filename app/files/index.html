@@ -1,0 +1,1761 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Software Checker</title> 
+    <link rel="icon" href="data:,">
+    <style>
+        /* === SKLONOWANY CSS Z WZORCA DRÄXLMAIER UX/UI === */
+        :root {
+            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --font-size-base: 16px; --radius-sm: 8px; --radius-md: 12px;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05); --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+            --transition-speed: 0.3s;
+        }
+        :root, :root[data-theme="light"] {
+            --bg-primary: #f8f9fa; 
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #e9ecef;
+            --text-primary: #0B0F10; 
+            --text-secondary: #6c757d; 
+            --border-color: #dee2e6;
+            --accent-color: #0097AC; 
+            --accent-color-hover: #007a8c; 
+            --status-ok: #34c759; 
+            --status-error: #ff3b30;
+            --status-warning: #ffc107;
+            --status-ok-bg: color-mix(in srgb, var(--status-ok) 10%, transparent);
+            --status-error-bg: color-mix(in srgb, var(--status-error) 10%, transparent);
+            --status-warning-bg: color-mix(in srgb, var(--status-warning) 10%, transparent);
+        }
+        :root[data-theme="dark"] {
+            --bg-primary: #0B0F10; 
+            --bg-secondary: #1a1f21; 
+            --bg-tertiary: #2c3235;
+            --text-primary: #f8f9fa; 
+            --text-secondary: #adb5bd; 
+            --border-color: #444;
+            --accent-color: #0097AC; 
+            --accent-color-hover: #00b2ca; 
+            --status-ok: #30d158; 
+            --status-error: #ff453a;
+            --status-warning: #ffca2c;
+            --status-ok-bg: color-mix(in srgb, var(--status-ok) 10%, transparent);
+            --status-error-bg: color-mix(in srgb, var(--status-error) 10%, transparent);
+            --status-warning-bg: color-mix(in srgb, var(--status-warning) 10%, transparent);
+        }
+
+        :root[data-theme="dark"] .sun-icon { display: none; }
+        :root[data-theme="light"] .moon-icon { display: none; }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { height: 100%; overflow: hidden; font-family: var(--font-family); background-color: var(--bg-primary); color: var(--text-primary); font-size: var(--font-size-base); transition: background-color var(--transition-speed), color var(--transition-speed); }
+        #app { display: flex; flex-direction: column; height: 100vh; } 
+        
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 44px; padding: 0 20px; border: none; border-radius: var(--radius-md); font-size: var(--font-size-base); font-weight: 600; cursor: pointer; transition: background-color var(--transition-speed), transform var(--transition-speed); -webkit-tap-highlight-color: transparent; white-space: nowrap; }
+        .btn:hover:not(:disabled) { transform: translateY(-2px); }
+        .btn:active:not(:disabled) { transform: translateY(0); }
+        .btn:disabled { background-color: var(--bg-tertiary); color: var(--text-secondary); cursor: not-allowed; transform: none; }
+        .btn svg { width: 1.2em; height: 1.2em; }
+        .btn-primary { background-color: var(--accent-color); color: white; box-shadow: var(--shadow-md); }
+        .btn-primary:hover:not(:disabled) { background-color: var(--accent-color-hover); }
+        .btn-secondary { background-color: var(--bg-tertiary); color: var(--text-primary); }
+        
+        .input-group { display: flex; flex-direction: column; gap: 4px; }
+        .input-group label { font-size: 0.9em; font-weight: 500; color: var(--text-secondary); }
+        .input-field, .select-field, textarea.input-field { 
+            width: 100%; padding: 12px; background-color: var(--bg-tertiary); 
+            border: 1px solid var(--border-color); border-radius: var(--radius-sm); 
+            font-size: 1em; color: var(--text-primary); font-family: inherit; 
+        }
+        textarea.input-field { resize: vertical; }
+        .input-field:focus, .select-field:focus, textarea.input-field:focus { 
+            outline: none; border-color: var(--accent-color); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-color) 40%, transparent);
+        }
+        .input-field[readonly] { background-color: var(--bg-primary); color: var(--text-secondary); cursor: not-allowed; }
+        
+        .select-field { 
+            -webkit-appearance: none; appearance: none; 
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e"); 
+            background-repeat: no-repeat; background-position: right 12px center; background-size: 1em; 
+            height: 44px; padding: 0 36px 0 12px; 
+            width: auto;
+        }
+        :root[data-theme="dark"] .select-field { 
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23f8f9fa' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e"); 
+        }
+        .select-field option { background-color: var(--bg-secondary); color: var(--text-primary); }
+
+        .app-header {
+            background-color: #0B0F10; 
+            color: #FFFFFF;
+            border-bottom: 1px solid #2c3235;
+            display: flex; align-items: center; justify-content: space-between; padding: 12px 24px; flex-shrink: 0;
+        }
+        .project-info { display: flex; align-items: center; gap: 12px; }
+        .header-actions { display: flex; align-items: center; gap: 16px; }
+        .brand-identity { display: flex; align-items: center; gap: 16px; }
+        .brand-identity h2 { font-size: 1.4em; font-weight: 600; margin: 0; color: #FFFFFF; }
+        .app-header .btn-secondary, .app-header #language-toggle {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #FFFFFF;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .app-header .btn-secondary:hover:not(:disabled), .app-header #language-toggle:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+        .header-actions { justify-content: flex-end; }
+        .btn-checker-action { width: 100%; }
+
+        .main-content { display: flex; flex-grow: 1; overflow: hidden; }
+        .form-panel { 
+            background-color: var(--bg-secondary); display: flex; flex-direction: column; 
+            border-right: 1px solid var(--border-color); overflow-y: auto; width: 400px; flex-shrink: 0;
+        }
+        .form-header, .form-footer { padding: 16px; flex-shrink: 0; display: flex; gap: 12px; flex-direction: column; }
+        .form-header { border-bottom: 1px solid var(--border-color); }
+        .form-content { padding: 0 16px; flex-grow: 1; display: flex; flex-direction: column; gap: 16px; }
+        .app-content-area { flex-grow: 1; overflow-y: auto; padding: 24px; background-color: var(--bg-primary);}
+
+        .status-dot { width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; flex-shrink: 0;}
+        .status-dot.ok { background-color: var(--status-ok); }
+        .status-dot.nok, .status-dot.error { background-color: var(--status-error); }
+        .status-dot.loading { background-color: var(--status-warning); }
+        
+        .status-indicator-g65 { 
+            display: flex; align-items: center; font-size: 0.9em; font-weight: 500; 
+            background-color: #0B0F10; color: #FFFFFF; padding: 4px 12px;
+            border-radius: var(--radius-sm); border: 1px solid var(--border-color);
+            margin-left: 16px;
+        }
+        .status-indicator-g65 .status-dot { margin-right: 4px; }
+        
+/* Animacja pulsowania dla statusu OK */
+@keyframes pulse-green {
+    0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--status-ok) 70%, transparent); } 
+    70% { box-shadow: 0 0 0 8px color-mix(in srgb, var(--status-ok) 0%, transparent); }
+    100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--status-ok) 0%, transparent); }
+}
+
+/* Zastosowanie animacji do zielonej kropki */
+.status-dot.ok {
+    animation: pulse-green 1.5s infinite;
+}
+
+
+
+
+
+
+        .result-detail-card { 
+            background-color: var(--bg-secondary); 
+            padding: 20px; 
+            border-radius: var(--radius-md); 
+            box-shadow: var(--shadow-sm); 
+            margin-bottom: 20px;
+        }
+        .result-table-container { 
+            max-height: 500px; 
+            overflow-y: auto; 
+            margin-top: 15px; 
+            border-radius: var(--radius-md); 
+            box-shadow: var(--shadow-sm); 
+            background-color: var(--bg-secondary);
+        }
+
+        /* Ulepszony styl tabeli */
+        #results-table, #history-table { width: 100%; border-collapse: collapse; font-size: 0.95em; }
+        #results-table th, #results-table td, #history-table th, #history-table td { padding: 12px 15px; text-align: left; }
+        #results-table th, #history-table th { 
+            background-color: var(--bg-tertiary); 
+            position: sticky; top: 0; 
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+        }
+        #results-table td, #history-table td {
+             border-bottom: 1px solid var(--border-color);
+             /* POPRAWKA: Ustawienie white-space na normal, aby uniknąć nakładania się */
+             white-space: normal; 
+        }
+
+        /* Styl dla wierszy NOK */
+        #results-table tr.result-nok { background-color: var(--status-error-bg); }
+        #history-table tr.result-nok { background-color: var(--status-error-bg); }
+        /* Styl dla wierszy OK */
+        #results-table tr.result-ok { background-color: var(--status-ok-bg); }
+        #history-table tr.result-ok { background-color: var(--status-ok-bg); }
+        
+        /* Ostatni wiersz bez linii, styl iOS */
+        #results-table tbody tr:last-child td, #history-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        /* Rozciąganie kolumn w DB Viewer */
+        #history-table { 
+            table-layout: auto; /* POPRAWKA: Wymuszenie auto, aby dopasować się do zawartości */
+            width: 100%;
+        }
+        #history-table th:nth-child(1) { width: 150px; } /* Timestamp */
+        #history-table th:nth-child(2) { width: 160px; } /* DMC */
+        #history-table th:nth-child(3) { width: 100px; } /* SNR */
+        #history-table th:nth-child(4) { width: 80px; } /* Result */
+        #history-table th:nth-child(5) { width: 30%; } /* Report File */
+        #history-table th:nth-child(6) { width: 30%; } /* Settings File */
+
+        .status-ok-text { color: var(--status-ok); font-weight: 700; }
+        .status-nok-text { color: var(--status-error); font-weight: 700; }
+        .status-error-text { color: var(--status-warning); font-weight: 700; } 
+
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--status-error) 40%, transparent); } 
+            70% { box-shadow: 0 0 0 10px color-mix(in srgb, var(--status-error) 0%, transparent); }
+            100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--status-error) 0%, transparent); }
+        }
+        .pulse-required {
+            animation: pulse-red 1.5s infinite;
+            border: 3px solid var(--status-error) !important;
+            border-radius: var(--radius-md);
+        }
+        .pulse-required svg { color: var(--status-error) !important; }
+
+        .central-placeholder {
+            display: flex; align-items: center; justify-content: center; height: 100%;
+            text-align: center; color: var(--text-secondary); font-size: 1.2em;
+            flex-direction: column; gap: 15px;
+        }
+        
+        .status-message-panel {
+            padding: 10px; border-radius: var(--radius-sm); font-weight: 500;
+            text-align: center; margin-top: -10px; margin-bottom: 10px; 
+            opacity: 0; transition: opacity 0.3s ease; display: none;
+        }
+        .status-message-panel.show { display: block; opacity: 1; }
+        .status-message-panel.error { background-color: var(--status-error-bg); color: var(--status-error); border: 1px solid var(--status-error); }
+        .status-message-panel.success { background-color: var(--status-ok-bg); color: var(--status-ok); border: 1px solid var(--status-ok); }
+        .status-message-panel.loading { background-color: var(--status-warning-bg); color: var(--text-primary); border: 1px solid var(--status-warning); }
+        
+        /* Dodatkowe style dla ustawień (Recipients list) */
+        .email-recipient-item { display: flex; gap: 10px; margin-bottom: 8px; }
+        .email-recipient-item input { flex-grow: 1; }
+        .remove-recipient-button { 
+            flex-shrink: 0; background-color: var(--status-error); color: white; border: none; 
+            border-radius: var(--radius-sm); font-weight: 700; cursor: pointer; padding: 0 12px; height: 44px;
+        }
+        .remove-recipient-button:hover { background-color: color-mix(in srgb, var(--status-error) 80%, black); }
+        
+        /* Tabela historii */
+        #history-table th.sortable { cursor: pointer; }
+        #history-table th.sortable:hover { background-color: color-mix(in srgb, var(--bg-tertiary) 80%, var(--bg-secondary)); }
+        #history-table th .sort-icon { display: inline-block; margin-left: 0.5rem; opacity: 0.3; }
+        #history-table th.sorted-asc .sort-icon, #history-table th.sorted-desc .sort-icon { opacity: 1; }
+        
+        /* Kontenery wykresów dla Analysis */
+        #analysis-view .chart-container { 
+            width: 100%; 
+            min-height: 450px; /* POPRAWKA: elastyczna wysokość */
+            height: auto;
+            margin-bottom: 20px;
+            background-color: var(--bg-secondary);
+            padding: 15px;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            display: flex; flex-direction: column; /* POPRAWKA: flex layout */
+        }
+        
+        .chart-container canvas {
+            max-width: 100% !important;
+            height: 400px !important; /* POPRAWKA: stała wysokość canvasu, kontener się dostosuje */
+            margin: 0 auto;
+        }
+        
+        /* Styl dla Live Session History na Dashboardzie */
+        .live-session-item {
+            display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed var(--border-color);
+            font-size: 0.95em;
+        }
+        .live-session-item:last-child { border-bottom: none; }
+        .live-session-result.OK { color: var(--status-ok); font-weight: 600; }
+        .live-session-result.NOK { color: var(--status-error); font-weight: 600; }
+        .live-session-result.ERROR { color: var(--status-warning); font-weight: 600; }
+
+
+
+
+/* Animacja "wjazdu" dla nowych wierszy w Live Session */
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Klasa do zastosowania animacji */
+.live-session-item.new-entry {
+    animation: fadeInDown 0.5s ease-out forwards;
+}
+
+
+
+
+
+
+
+        /* Styl dla Recent Scans w bocznym panelu */
+        .recent-scan-item {
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 8px 0; border-bottom: 1px dashed var(--border-color);
+            font-size: 0.9em; cursor: pointer;
+        }
+        .recent-scan-item:hover {
+            background-color: color-mix(in srgb, var(--bg-tertiary) 50%, transparent);
+        }
+        .recent-scan-item:last-child { border-bottom: none; }
+        .recent-scan-status.OK { color: var(--status-ok); }
+        .recent-scan-status.NOK { color: var(--status-error); }
+        .recent-scan-status.ERROR { color: var(--status-warning); }
+
+
+        @media (max-width: 768px) {
+            .main-content { flex-direction: column; }
+            .form-panel { width: 100%; border-right: none; border-bottom: 1px solid var(--border-color); }
+        }
+        
+        /* CSS dla Toggle (przeniesiony z starej wersji) */
+        .toggle-switch { position: relative; display: inline-block; width: 50px; height: 28px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border-color); transition: .4s; border-radius: 28px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--accent-color); }
+        input:checked + .slider:before { transform: translateX(22px); }
+        
+        /* Dark Mode Styles for Sidebars */
+        :root[data-theme="dark"] .form-panel {
+            background: #0a0a0a;
+            border-right: 1px solid #1a1a1a;
+        }
+
+        :root[data-theme="dark"] .form-panel h2,
+        :root[data-theme="dark"] .form-panel h3,
+        :root[data-theme="dark"] .form-panel h4 {
+            color: #e0e0e0;
+        }
+
+        :root[data-theme="dark"] .recent-scan-item {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+        }
+
+        :root[data-theme="dark"] .recent-scan-item:hover {
+            background: #252525;
+        }
+        
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: var(--bg-tertiary); }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 5px; border: 2px solid var(--bg-tertiary); }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
+        :root[data-theme="dark"] { color-scheme: dark; }
+        
+    </style>
+</head>
+<body data-theme="dark">
+
+    <div id="app">
+        <header class="app-header">
+            <div class="project-info">
+                <div class="brand-identity">
+                    <h2>Dräxlmaier Group</h2>
+                </div>
+                <div id="network-status" class="status-indicator-g65" title="Watchdog Connection Status">
+                    <div id="status-dot" class="status-dot nok"></div>
+                    <span id="status-text">Disconnected</span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button id="live-session-button" class="btn btn-secondary" data-view="dashboard-view" title="Live Watchdog Session">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M4 2h4v2H4V8H2V4c0-1.1.9-2 2-2zM20 2h-4v2h4v4h2V4c0-1.1-.9-2-2-2zM4 22h4v-2H4v-4H2v4c0 1.1.9 2 2 2zM20 22h-4v-2h4v-4h2v4c0 1.1-.9 2-2 2zM6 6h12v12H6V6z"/>
+    </svg>
+    <span data-i18n="liveSession">Live Session</span>
+</button>
+
+                
+                <button id="history-button" class="btn btn-secondary" data-view="history-view" title="Processing History"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 0 00-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 000-1.5h-3.75V6z" clip-rule="evenodd" /></svg><span data-i18n="dbViewer">DB Viewer</span></button>
+                
+                <button id="analysis-button" class="btn btn-secondary" data-view="analysis-view" title="Statistical Analysis"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M5 9.2h3V19H5V9.2zM10.6 5h2.8v14h-2.8V5zm5.6 8H19v6h-2.8v-6z"></path></svg><span data-i18n="analysis">Analysis</span></button>
+                
+                <select id="language-toggle" class="select-field">
+                    <option value="en" selected>EN</option>
+                    <option value="pl">PL</option>
+                    <option value="de">DE</option>
+                    <option value="ro">RO</option>
+                </select>
+                
+                <button id="theme-toggle" class="btn btn-secondary" title="Toggle theme">
+                    <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M20 15.31 23.31 12 20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69zM12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"></path></svg>
+                    <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10 2c-1.82 0-3.53.5-5 1.35C7.99 5.08 10 8.3 10 12s-2.01 6.92-5 8.65C6.47 21.5 8.18 22 10 22c5.52 0 10-4.48 10-10S15.52 2 10 2z"></path></svg>
+                </button>
+                <button id="settings-button" class="btn btn-secondary pulse-required" data-view="settings-view" title="Critical Settings">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.38-1.09-.69-1.7-.93L13.43 3.46c-.05-.21-.24-.37-.46-.37h-4c-.22 0-.4.16-.45-.37l-.49 2.52c-.61.24-1.17.55-1.7.93l-2.49-1c-.22-.08-.49 0-.61.22l-2 3.46c-.12.22-.07.49.12.64l2.11 1.65c-.04.32-.07.64-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.38 1.09.69 1.7.93l.49 2.52c.05.21.24.37.46.37h4c.22 0 .4-.16.45-.37l.49-2.52c.61-.24 1.17.55 1.7-.93l2.49 1c.22.08.49 0 .61.22l2-3.46c.12-.22-.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"></path></svg>
+                </button>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <aside id="checker-form-panel" class="form-panel">
+                <div class="form-header">
+                    <h3 data-i18n="scanningTitle">Scanning / Software Check</h3>
+                    <div id="status-message" class="status-message-panel"></div>
+                </div>
+                
+                <div class="form-content">
+                    <div class="input-group">
+                        <label for="dmc-input" data-i18n="dmcLabel">Enter or scan DMC code:</label>
+                        <input type="text" id="dmc-input" class="input-field" placeholder="xxxxxxxxxxxxx">
+                    </div>
+                    
+                    <div style="margin-top: 0px; margin-bottom: 16px;">
+                         <button id="check-button" class="btn btn-primary btn-checker-action">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M4 2h4v2H4V8H2V4c0-1.1.9-2 2-2zM20 2h-4v2h4v4h2V4c0-1.1-.9-2-2-2zM4 22h4v-2H4v-4H2v4c0 1.1.9 2 2 2zM20 22h-4v-2h4v-4h2v4c0 1.1-.9 2-2 2zM6 6h12v12H6V6z"/>
+    </svg>
+    <span data-i18n="runCheck">CHECK SOFTWARE</span>
+</button>
+
+                    </div>
+
+                    <div style="color: var(--text-secondary); font-size: 0.9em; border-top: 1px solid var(--border-color); padding-top: 15px;">
+                        <h4 style="color: var(--text-primary); margin-bottom: 5px;" data-i18n="recentScans">Recent Scans:</h4>
+                        <div id="recent-scans-list">
+                            <p style="color: var(--text-secondary); font-size: 0.9em; text-align: center;" data-i18n="noRecentScans">No recent scans.</p>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <section id="main-content-area" class="app-content-area">
+                
+                <div id="results-view" class="active-view">
+                    <h3 data-i18n="detailedAnalysisTitle">Detailed Software Analysis</h3>
+                    <div id="results-metadata" class="result-detail-card" style="display: none;">
+                        <p><strong data-i18n="dmcLabelShort">DMC:</strong> <span id="result-dmc"></span> | <strong data-i18n="snrLabelShort">SNR:</strong> <span id="result-snr"></span></p>
+                        <p><strong data-i18n="settingsFileLabel">Settings File:</strong> <span id="result-settings-file" title="Path to settings file">N/A</span></p>
+                        <p><strong data-i18n="settingsDateLabel">Settings Date:</strong> <span id="result-settings-date" title="Date of settings file">N/A</span></p>
+                        <div style="font-size: 1.4em; font-weight: 700; padding: 10px 0; margin-top: 10px; border-top: 1px solid var(--border-color);">
+                            <span data-i18n="finalResultLabel">FINAL RESULT:</span> <span id="final-result" class="status-nok-text">N/A</span>
+                        </div>
+                    </div>
+
+                    <div id="empty-results-placeholder" class="central-placeholder">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 48px; height: 48px; opacity: 0.5;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9v-2h2v2zm0-4H9V8h2v4zm4 0h-2V8h2v4z"></path></svg>
+                        <p data-i18n="placeholderText">Enter a DMC code to see detailed comparative analysis.</p>
+                    </div>
+                    
+                    <div id="results-table-wrapper" style="display: none;">
+                        <div class="result-table-container">
+                            <table id="results-table">
+                                <thead><tr><th data-i18n="fieldHeader">Field</th><th data-i18n="reportHeader">Report</th><th data-i18n="settingsHeader">Settings</th><th data-i18n="resultHeader">Result</th></tr></thead>
+                                <tbody id="results-table-body"></tbody>
+                            </table>
+                        </div>
+                        
+                        <div id="smac-generator" style="margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 15px;">
+                            <h4 style="width: 100%; margin-bottom: 5px;" data-i18n="exportTools">Export Tools:</h4>
+                            <div style="display: flex; gap: 10px; width: 100%; margin-top: 10px; flex-wrap: wrap;" id="smac-id-inputs">
+                                <input type="text" id="hwel-id-input" class="input-field" readonly style="flex: 1; font-size: 0.9em; display: none;" placeholder="HWEL ID">
+                                <input type="text" id="btld-id-input" class="input-field" readonly style="flex: 1; font-size: 0.9em; display: none;" placeholder="BTLD ID">
+                                <input type="text" id="swfl-id-input" class="input-field" readonly style="flex: 1; font-size: 0.9em; display: none;" placeholder="SWFL ID">
+                            </div>
+                            <div style="display: flex; gap: 10px; width: 100%; margin-top: 10px;">
+                                <button id="generate-smac-json" class="btn btn-primary" style="flex: 1;"><span data-i18n="generateSmacJsonButton">GENERATE & DOWNLOAD SMAC</span></button>
+                                <button id="save-report-jpg" class="btn btn-secondary" style="flex: 1;"><span data-i18n="saveReportJpgButton">SAVE REPORT (JPG)</span></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="dashboard-view" style="display: none;">
+                    <h3 data-i18n="liveSession">Live Session Tracker (Watchdog)</h3>
+                    <div class="result-detail-card">
+                         <h4 data-i18n="recentWatchdogEvents">Recent Watchdog Events (from results.csv):</h4>
+                         <div id="live-session-history" style="margin-top: 15px;">
+                             <p style="color: var(--text-secondary); text-align: center;">Loading recent events...</p>
+                         </div>
+                         <div style="font-size: 0.9em; color: var(--text-secondary); margin-top: 15px; border-top: 1px dashed var(--border-color); padding-top: 10px;">
+                             <span data-i18n="liveNote">This view shows the latest files processed by the Watchdog in this session (from results.csv).</span>
+                         </div>
+                    </div>
+                </div>
+                
+                <div id="analysis-view" style="display: none;">
+                    <h3 data-i18n="statisticalAnalysis">Statistical Analysis (All Time)</h3>
+                    <div class="chart-container">
+                        <h4 style="margin-bottom: 10px; color: var(--text-primary); text-align: center;" data-i18n="okVsNok">OK vs NOK (Total)</h4>
+                        <canvas id="nok-pie-chart-analysis"></canvas> 
+                    </div>
+                    <div class="chart-container">
+                        <h4 style="margin-bottom: 10px; color: var(--text-primary); text-align: center;" data-i18n="nokBreakdown">NOK Failure Breakdown</h4>
+                        <canvas id="nok-bar-chart-analysis"></canvas> 
+                    </div>
+                </div>
+
+
+                <div id="history-view" style="display: none;">
+                    <h3 data-i18n="historyTitle">Processing History (DB Viewer)</h3>
+                    <div class="result-detail-card">
+                         <div class="history-filters" style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end; padding: 0.5rem 0;">
+                             <div class="input-group" style="gap: 0.25rem;">
+                                 <label for="history-date-from">From:</label>
+                                 <input type="date" id="history-date-from" class="input-field" style="height: 35px; padding: 0 12px; width: 150px;">
+                             </div>
+                             <div class="input-group" style="gap: 0.25rem;">
+                                 <label for="history-date-to">To:</label>
+                                 <input type="date" id="history-date-to" class="input-field" style="height: 35px; padding: 0 12px; width: 150px;">
+                             </div>
+                             <div class="filter-buttons" style="display: flex; gap: 0.5rem; margin-left: auto;">
+                                 <button id="export-history-csv" class="btn btn-secondary" style="height: 35px; padding: 0 15px; font-size: 0.9em; font-weight: 500;">Export CSV</button>
+                                 <button id="history-apply-filter" class="btn btn-primary" style="height: 35px; padding: 0 15px; font-size: 0.9em;">Apply</button>
+                                 <button id="history-clear-filter" class="btn btn-secondary" style="height: 35px; padding: 0 15px; font-size: 0.9em;">Clear</button>
+                                 <button id="history-refresh" class="btn btn-secondary" style="height: 35px; padding: 0 15px; font-size: 0.9em;">Refresh</button>
+                             </div>
+                         </div>
+                         <div class="result-table-container" style="max-height: 60vh;">
+                             <table id="history-table">
+                                 <thead>
+                                     <tr>
+                                         <th class="sortable" data-col="timestamp"><span data-i18n="timestampHeader">Timestamp</span> <span class="sort-icon"></span></th>
+                                         <th class="sortable" data-col="dmc"><span data-i18n="dmcHeader">DMC</span> <span class="sort-icon"></span></th>
+                                         <th class="sortable" data-col="snr"><span data-i18n="snrHeader">SNR</span> <span class="sort-icon"></span></th>
+                                         <th class="sortable" data-col="final"><span data-i18n="resultHeader">Result</span> <span class="sort-icon"></span></th>
+                                         <th data-col="report_file" data-i18n="reportFileHeader">Report File</th>
+                                         <th data-col="settings_file" data-i18n="settingsFileHeader">Settings File</th>
+                                     </tr>
+                                 </thead>
+                                 <tbody id="history-table-body">
+                                     <tr><td colspan="6" style="text-align: center;">Press 'Refresh' to load history.</td></tr>
+                                 </tbody>
+                             </table>
+                         </div>
+                    </div>
+                </div>
+
+
+                <div id="settings-view" style="display: none;">
+                    <h3 data-i18n="criticalSettingsTitle">Critical Settings and Configuration</h3>
+                    <div id="settings-status-message" class="status-message-panel">Loading settings...</div>
+                    
+                    <div class="input-group" style="margin-bottom: 15px;">
+                        <label for="reports-path" data-i18n="reportsFolderLabel">1. Reports Folder (Watchdog / Network Path)</label>
+                        <div class="input-group" style="flex-direction: row; gap: 10px;">
+                            <input type="text" id="reports-path" class="input-field" placeholder="Path to reports folder" readonly>
+                            <button id="browse-reports" class="btn btn-secondary" style="width: 120px;" data-i18n="browseButton">Browse...</button>
+                        </div>
+                    </div>
+                    <div class="input-group" style="margin-bottom: 15px;">
+                        <label for="settings-path" data-i18n="settingsFolderLabel">2. Settings Folder (Settings Files)</label>
+                        <div class="input-group" style="flex-direction: row; gap: 10px;">
+                            <input type="text" id="settings-path" class="input-field" placeholder="Path to settings files" readonly>
+                            <button id="browse-settings" class="btn btn-secondary" style="width: 120px;" data-i18n="browseButton">Browse...</button>
+                        </div>
+                    </div>
+                    <div class="input-group" style="margin-bottom: 15px;">
+                        <label for="csv-path" data-i18n="csvPathLabel">3. CSV Path (History file location)</label>
+                        <div class="input-group" style="flex-direction: row; gap: 10px;">
+                            <input type="text" id="csv-path" class="input-field" placeholder="Path to results.csv" readonly>
+                            <button id="browse-csv" class="btn btn-secondary" style="width: 120px;" data-i18n="browseButton">Browse...</button>
+                        </div>
+                    </div>
+                    
+                    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 15px 0;">
+                    
+                    <div class="input-group" style="margin-bottom: 15px;">
+                        <label data-i18n="emailRecipientsLabelLong">4. Email Recipients (NOK/Error) - separate with commas</label>
+                        <div id="mail-recipients-list"></div>
+                        <button id="add-recipient-button" class="btn btn-secondary" style="align-self: flex-start; height: 35px; padding: 0 10px; font-weight: 500;" data-i18n="addRecipientButton">+ Add Recipient</button>
+                        
+                        <div style="margin-top: 10px; display: flex; justify-content: space-between;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <label for="archive-toggle" data-i18n="archiveLabel" style="font-weight: 600; color: var(--text-primary); margin-bottom: 0;">Archive processed files:</label>
+                                <label class="toggle-switch" style="margin-bottom: 0;">
+                                    <input type="checkbox" id="archive-toggle">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <button id="clear-email-button" class="btn btn-secondary" style="color: var(--status-error); border: 1px solid var(--status-error); background-color: var(--status-error-bg); height: 35px; padding: 0 10px; font-weight: 500;" data-i18n="clearEmailButton">Clear Emails</button>
+                        </div>
+                        
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; margin-top: 25px; border-top: 1px solid var(--border-color); padding-top: 15px;">
+                        <button id="reset-all-button" class="btn btn-secondary" style="background-color: var(--status-error); color: white;" data-i18n="resetAllButton">FACTORY RESET</button>
+                        <div style="display: flex; gap: 10px;">
+                            <button id="cancel-settings" class="btn btn-secondary" style="background-color: var(--bg-tertiary); color: var(--text-primary);" data-i18n="cancelButton">Cancel</button>
+                            <button id="save-settings" class="btn btn-primary" data-i18n="saveButton">SAVE SETTINGS</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+        
+        <footer style="position: fixed; bottom: 0; left: 0; width: 100%; text-align: center; padding: 5px; background-color: var(--bg-tertiary); color: var(--text-secondary); font-size: 0.75em; border-top: 1px solid var(--border-color); z-index: 5;">
+            Created by Q-Support Marcin Szymański (v2.4.1 - Final UX)
+        </footer>
+    </div>
+    
+    <script src="/html2canvas.min.js"></script>
+    <script src="/chart.min.js"></script>
+
+    <script>
+        // === LOGIKA APLIKACJI (POŁĄCZENIE Z LOGIKĄ V2.4.1) ===
+        (function() {
+        // --- Translations (Expanded from v2.4.1) ---
+        const T = { 
+            pl: {
+                dmcLabel: "Wprowadź lub zeskanuj kod DMC:", runCheck: "SPRAWDŹ OPROGRAMOWANIE", resultsWillAppear: "Szczegółowe wyniki pojawią się obok.",
+                liveSession: "Sesja Na Żywo", dbViewer: "Przeglądarka Bazy", analysis: "Analiza",
+                connected: "Połączono", notConnected: "Rozłączono", setupRequired: "Wymagana Konfiguracja",
+                networkError: "Błąd Sieci",
+                lastResult: "Ostatni wynik:", time: "Czas:", historyTitle: "Historia Przetwarzania (DB Viewer)",
+                statsTitle: "Status Sesji Watchdoga", okTotal: "OK Łącznie:", nokTotal: "NOK Łącznie:",
+                statsHistory: "Statystyki z Całej Historii:",
+                liveNote: "Uwaga: Ten widok pokazuje najnowsze pliki przetworzone przez Watchdoga w tej sesji (z results.csv).",
+                msgPathsNotSet: "Błąd: Ścieżki Reports/Settings nie są ustawione w Ustawieniach!",
+                msgDmcEmptyOrPathsInvalid: "Błąd: Wprowadź kod DMC LUB sprawdź, czy ścieżki są poprawne.",
+                msgReportNotFound: "Błąd: Nie znaleziono najnowszego raportu XML dla tego DMC: {0}",
+                msgSnrNotFound: "Błąd: Nie znaleziono numeru SNR w raporcie: {0}",
+                msgSettingsNotFound: "Błąd: Nie znaleziono ustawień dla SNR: {0} (z DMC: {1})",
+                msgInvalidReportXML: "Błąd: Nie można sparsować pliku raportu XML (uszkodzony/niekompletny).",
+                internalError: "Błąd wewnętrzny serwera. Sprawdź logi aplikacji.",
+                msgSetupRequired: "Wymagana Konfiguracja: Ustaw ścieżki Watchdoga/Ustawień w ⚙️!",
+                saveSuccess: "Ustawienia zapisane pomyślnie. Watchdog został zrestartowany.",
+                resetConfirm: "Jesteś pewien? To usunie WSZYSTKIE ustawienia i plik historii CSV!",
+                resetSuccess: "Reset fabryczny zakończony. Odśwież stronę.",
+                settingsTitle: "Ustawienia", settingsLabel: "Folder Ustawień:", reportsLabel: "Folder Raportów (Watch Folder):",
+                csvLabel: "Ścieżka do wyników CSV (Folder lub Plik):", browseButton: "Przeglądaj...", emailSettingsTitle: "Powiadomienia E-mail (przez Outlook)",
+                mailRecipientsLabel: "Adresaci Maili (NOK/Błąd):", archiveLabel: "Archiwizuj przetworzone pliki:",
+                clearEmailButton: "Wyczyść Maile", resetAllButton: "Reset Fabryczny", saveButton: "Zapisz", cancelButton: "Anuluj",
+                summaryTitle: "Podsumowanie", resultPass: "PASS", resultFail: "FAIL", resultError: "ERROR",
+                closeButton: "Zamknij", saveReportJpgButton: "ZAPISZ RAPORT (JPG)", fieldHeader: "Pole",
+                reportHeader: "Raport HEX", settingsHeader: "Ustawienia HEX", resultHeader: "Wynik",
+                generateSmacJsonButton: "GENERUJ I POBIERZ SMAC",
+                placeholderText: "Wprowadź kod DMC, aby zobaczyć szczegółową analizę porównawczą.",
+                loadingMsg: "Sprawdzanie, proszę czekać...",
+                invalidEmail: "Jeden lub więcej adresów e-mail jest nieprawidłowy. Proszę sprawdzić.",
+                scanningTitle: "Skanowanie / Sprawdzanie Oprogramowania",
+                enterDmc: "Wprowadź lub zeskanuj kod DMC:",
+                checkSoftware: "SPRAWDŹ OPROGRAMOWANIE",
+                recentScans: "Ostatnie Skany:",
+                noRecentScans: "Brak ostatnich skanów.",
+                statisticalAnalysis: "Analiza Statystyczna (Cały Czas)",
+                okVsNok: "OK vs NOK (Łącznie)",
+                nokBreakdown: "Podział Awarii NOK",
+                exportTools: "Narzędzia Eksportu:",
+                recentWatchdogEvents: "Ostatnie Zdarzenia Watchdoga (z results.csv):",
+                timestampHeader: "Znacznik Czasu",
+                dmcHeader: "DMC",
+                snrHeader: "SNR",
+                reportFileHeader: "Plik Raportu",
+                settingsFileHeader: "Plik Ustawień",
+                reportsFolderLabel: "1. Folder Raportów (Watchdog / Ścieżka Sieciowa)",
+                settingsFolderLabel: "2. Folder Ustawień (Pliki Ustawień)",
+                csvPathLabel: "3. Ścieżka CSV (Lokalizacja pliku historii)",
+                emailRecipientsLabelLong: "4. Adresaci E-mail (NOK/Błąd) - oddziel przecinkami",
+                settingsFileLabel: "Plik Ustawień:",
+                settingsDateLabel: "Data Ustawień:",
+                finalResultLabel: "WYNIK KOŃCOWY:",
+                detailedAnalysisTitle: "Szczegółowa Analiza Oprogramowania",
+                criticalSettingsTitle: "Krytyczne Ustawienia i Konfiguracja",
+                addRecipientButton: "+ Dodaj Odbiorcę",
+                dmcLabelShort: "DMC:",
+                snrLabelShort: "SNR:"
+            },
+            en: {
+                dmcLabel: "Enter or scan DMC code:", runCheck: "CHECK SOFTWARE", resultsWillAppear: "Detailed results will appear next to you.",
+                liveSession: "Live Session", dbViewer: "DB Viewer", analysis: "Analysis",
+                connected: "Connected", notConnected: "Not Connected", setupRequired: "Setup Required",
+                networkError: "Network Error",
+                lastResult: "Last Result:", time: "Time:", historyTitle: "Processing History (DB Viewer)",
+                statsTitle: "Watchdog Session Status", okTotal: "OK Total:", nokTotal: "NOK Total:",
+                statsHistory: "Statistics from All Time History:", 
+                liveNote: "Note: This view shows the latest files processed by the Watchdog in this session (from results.csv).",
+                msgPathsNotSet: "Error: Reports/Settings paths are not set in Settings!",
+                msgDmcEmptyOrPathsInvalid: "Error: Enter DMC code OR check paths.",
+                msgReportNotFound: "Error: No latest XML report found for this DMC: {0}",
+                msgSnrNotFound: "Error: SNR not found in the XML report: {0}",
+                msgSettingsNotFound: "Error: No settings found for this SNR: {0} (from DMC: {1})",
+                msgInvalidReportXML: "Error: Failed to parse report XML (corrupt/incomplete).",
+                internalError: "Internal server error. Check app logs.",
+                msgSetupRequired: "Setup Required: Set Watchdog/Settings paths in ⚙️!",
+                saveSuccess: "Settings saved successfully. Watchdog restarted.",
+                resetConfirm: "Are you sure? This will delete ALL settings and CSV history!",
+                resetSuccess: "Factory Reset complete. Refresh the page.",
+                settingsTitle: "Settings", settingsLabel: "Settings Folder:", reportsLabel: "Reports Folder (Watch Folder):",
+                csvLabel: "CSV Results Path (Folder or File):", browseButton: "Browse...", emailSettingsTitle: "E-mail Notifications (via Outlook)",
+                mailRecipientsLabel: "Recipients (for NOK & Errors):", archiveLabel: "Archive processed files:",
+                clearEmailButton: "Clear Emails", resetAllButton: "Factory Reset", saveButton: "Save", cancelButton: "Cancel",
+                summaryTitle: "Summary", resultPass: "PASS", resultFail: "FAIL", resultError: "ERROR",
+                closeButton: "Close", saveReportJpgButton: "SAVE REPORT (JPG)", fieldHeader: "Field",
+                reportHeader: "Report HEX", settingsHeader: "Settings HEX", resultHeader: "Result",
+                generateSmacJsonButton: "GENERATE & DOWNLOAD SMAC",
+                placeholderText: "Enter a DMC code to see detailed comparative analysis.",
+                loadingMsg: "Checking, please wait...",
+                invalidEmail: "One or more email addresses are invalid. Please check.",
+                scanningTitle: "Scanning / Software Check",
+                enterDmc: "Enter or scan DMC code:",
+                checkSoftware: "CHECK SOFTWARE",
+                recentScans: "Recent Scans:",
+                noRecentScans: "No recent scans.",
+                statisticalAnalysis: "Statistical Analysis (All Time)",
+                okVsNok: "OK vs NOK (Total)",
+                nokBreakdown: "NOK Failure Breakdown",
+                exportTools: "Export Tools:",
+                recentWatchdogEvents: "Recent Watchdog Events (from results.csv):",
+                timestampHeader: "Timestamp",
+                dmcHeader: "DMC",
+                snrHeader: "SNR",
+                reportFileHeader: "Report File",
+                settingsFileHeader: "Settings File",
+                reportsFolderLabel: "1. Reports Folder (Watchdog / Network Path)",
+                settingsFolderLabel: "2. Settings Folder (Settings Files)",
+                csvPathLabel: "3. CSV Path (History file location)",
+                emailRecipientsLabelLong: "4. Email Recipients (NOK/Error) - separate with commas",
+                settingsFileLabel: "Settings File:",
+                settingsDateLabel: "Settings Date:",
+                finalResultLabel: "FINAL RESULT:",
+                detailedAnalysisTitle: "Detailed Software Analysis",
+                criticalSettingsTitle: "Critical Settings and Configuration",
+                addRecipientButton: "+ Add Recipient",
+                dmcLabelShort: "DMC:",
+                snrLabelShort: "SNR:"
+            },
+            de: {
+                 dmcLabel: "DMC-Code eingeben oder scannen:", runCheck: "SOFTWARE PRÜFEN", resultsWillAppear: "Detaillierte Ergebnisse werden daneben angezeigt.",
+                 liveSession: "Live Session", dbViewer: "DB Viewer", analysis: "Analyse",
+                 connected: "Verbunden", notConnected: "Nicht verbunden", setupRequired: "Setup erforderlich",
+                 networkError: "Netzwerkfehler",
+                 lastResult: "Letztes Ergebnis:", time: "Zeit:", historyTitle: "Verarbeitungshistorie (DB Viewer)",
+                 statsTitle: "Watchdog Session Status", okTotal: "OK Gesamt:", nokTotal: "NOK Gesamt:",
+                 statsHistory: "Statistiken aus Historie:",
+                 liveNote: "Hinweis: Diese Ansicht zeigt die zuletzt vom Watchdog verarbeiteten Dateien in dieser Sitzung (aus results.csv).",
+                 msgPathsNotSet: "Fehler: Berichts-/Einstellungen-Pfade sind nicht festgelegt!",
+                 msgDmcEmptyOrPathsInvalid: "Fehler: DMC-Code eingeben ODER Pfade überprüfen.",
+                 msgReportNotFound: "Fehler: Kein aktueller XML-Bericht für diesen DMC gefunden: {0}",
+                 msgSnrNotFound: "Fehler: SNR im XML-Bericht nicht gefunden: {0}",
+                 msgSettingsNotFound: "Fehler: Keine Einstellungen für diese SNR in XML gefunden: {0} (von DMC: {1})",
+                 msgInvalidReportXML: "Fehler: XML-Bericht konnte nicht geparst werden.",
+                 internalError: "Interner Serverfehler. App-Protokolle prüfen.",
+                 msgSetupRequired: "Setup erforderlich: Watchdog/Einstellungen-Pfade in ⚙️ festlegen!",
+                 saveSuccess: "Einstellungen erfolgreich gespeichert. Watchdog neu gestartet.",
+                 resetConfirm: "Sind Sie sicher? Dies löscht ALLE Einstellungen und CSV-Historien!",
+                 resetSuccess: "Werksreset abgeschlossen. Seite neu laden.",
+                 settingsTitle: "Einstellungen", settingsLabel: "Einstellungsordner:", reportsLabel: "Berichtsordner (Watch Folder):",
+                 csvLabel: "CSV-Ergebnispfad (Ordner oder Datei):", browseButton: "Durchsuchen...", emailSettingsTitle: "E-Mail-Benachrichtigungen (via Outlook)",
+                 mailRecipientsLabel: "Empfänger (für NOK & Fehler):", archiveLabel: "Archivierte verarbeitete Dateien:",
+                 clearEmailButton: "E-Mails löschen", resetAllButton: "Werksreset", saveButton: "Speichern", cancelButton: "Abbrechen",
+                 summaryTitle: "Zusammenfassung", resultPass: "PASS", resultFail: "FEHLER", resultError: "FEHLER",
+                 closeButton: "Schließen", saveReportJpgButton: "BERICHT SPEICHERN (JPG)", fieldHeader: "Feld",
+                 reportHeader: "Bericht HEX", settingsHeader: "Einstellungen HEX", resultHeader: "Ergebnis",
+                 generateSmacJsonButton: "SMAC GENERIEREN & HERUNTERLADEN",
+                 placeholderText: "Geben Sie einen DMC-Code ein, um eine detaillierte vergleichende Analyse anzuzeigen.",
+                 loadingMsg: "Prüfe, bitte warten...",
+                 invalidEmail: "Eine oder mehrere E-Mail-Adressen sind ungültig. Bitte überprüfen Sie.",
+                 scanningTitle: "Scannen / Softwareprüfung",
+                 enterDmc: "DMC-Code eingeben oder scannen:",
+                 checkSoftware: "SOFTWARE PRÜFEN",
+                 recentScans: "Letzte Scans:",
+                 noRecentScans: "Keine letzten Scans.",
+                 statisticalAnalysis: "Statistische Analyse (Gesamtzeit)",
+                 okVsNok: "OK vs NOK (Gesamt)",
+                 nokBreakdown: "NOK-Fehleraufschlüsselung",
+                 exportTools: "Export-Tools:",
+                 recentWatchdogEvents: "Letzte Watchdog-Ereignisse (aus results.csv):",
+                 timestampHeader: "Zeitstempel",
+                 dmcHeader: "DMC",
+                 snrHeader: "SNR",
+                 reportFileHeader: "Berichtsdatei",
+                 settingsFileHeader: "Einstellungsdatei",
+                 reportsFolderLabel: "1. Berichtsordner (Watchdog / Netzwerkpfad)",
+                 settingsFolderLabel: "2. Einstellungsordner (Einstellungsdateien)",
+                 csvPathLabel: "3. CSV-Pfad (Speicherort der Historie)",
+                 emailRecipientsLabelLong: "4. E-Mail-Empfänger (NOK/Fehler) - mit Kommas trennen",
+                 settingsFileLabel: "Einstellungsdatei:",
+                 settingsDateLabel: "Einstellungsdatum:",
+                 finalResultLabel: "ENDERGEBNIS:",
+                 detailedAnalysisTitle: "Detaillierte Softwareanalyse",
+                 criticalSettingsTitle: "Kritische Einstellungen und Konfiguration",
+                 addRecipientButton: "+ Empfänger hinzufügen",
+                 dmcLabelShort: "DMC:",
+                 snrLabelShort: "SNR:"
+             },
+             ro: {
+                 dmcLabel: "Introduceți sau scanați codul DMC:", runCheck: "VERIFICARE SOFTWARE", resultsWillAppear: "Rezultatele detaliate vor apărea lângă dvs.",
+                 liveSession: "Live Session", dbViewer: "Vizualizare DB", analysis: "Analiză",
+                 connected: "Conectat", notConnected: "Nu e conectat", setupRequired: "Configurare necesară",
+                 networkError: "Eroare de rețea",
+                 lastResult: "Ultimul rezultat:", time: "Ora:", historyTitle: "Istoric Procesare (Vizualizare DB)",
+                 statsTitle: "Watchdog Session Status", okTotal: "Total OK:", nokTotal: "Total NOK:",
+                 statsHistory: "Statistici din Istoric:",
+                 liveNote: "Notă: Această vizualizare arată cele mai recente fișiere procesate de Watchdog în această sesiune (din results.csv).",
+                 msgPathsNotSet: "Eroare: Căile Rapoarte/Setări nu sunt stabilite în Setări!",
+                 msgDmcEmptyOrPathsInvalid: "Eroare: Introduceți cod DMC SAU verificați căile.",
+                 msgReportNotFound: "Eroare: Nu s-a găsit cel mai recent raport XML pentru acest DMC: {0}",
+                 msgSnrNotFound: "Eroare: SNR nu a fost găsit în raportul XML: {0}",
+                 msgSettingsNotFound: "Eroare: Nu s-au găsit setări pentru acest SNR în niciun fișier XML: {0} (din DMC: {1})",
+                 msgInvalidReportXML: "Eroare: Eșuat la parsarea raportului XML.",
+                 internalError: "Eroare internă a serverului. Verificați jurnalele.",
+                 msgSetupRequired: "Configurare necesară: Setați căile Watchdog/Setări în ⚙️!",
+                 saveSuccess: "Setările au fost salvate cu succes. Watchdog repornit.",
+                 resetConfirm: "Sunteți sigur? Aceasta va șterge TOATE setările și istoricul CSV!",
+                 resetSuccess: "Resetare fabrică finalizată. Reîmprospátați pagina.",
+                 settingsTitle: "Setări", settingsLabel: "Dosar Setări:", reportsLabel: "Dosar Rapoarte (Watch Folder):",
+                 csvLabel: "Cale Rezultate CSV (Dosar sau Fișier):", browseButton: "Răsfoiește...", emailSettingsTitle: "Notificări E-mail (via Outlook)",
+                 mailRecipientsLabel: "Destinatari (pentru NOK & Erori):", archiveLabel: "Arhivare fișiere procesate:",
+                 clearEmailButton: "Șterge E-mailuri", resetAllButton: "Resetare Fabrică", saveButton: "Salvează", cancelButton: "Anulează",
+                 summaryTitle: "Rezumat", resultPass: "PASS", resultFail: "FAIL", resultError: "EROARE",
+                 closeButton: "Închide", saveReportJpgButton: "SALVEAZĂ RAPORTUL (JPG)", fieldHeader: "Câmp",
+                 reportHeader: "Raport HEX", settingsHeader: "Setări HEX", resultHeader: "Rezultat",
+                 generateSmacJsonButton: "GENEREAZĂ ȘI DESCARCĂ SMAC",
+                 placeholderText: "Introduceți un cod DMC pentru a vedea o analiză comparativă detaliată.",
+                 loadingMsg: "Verificare, vă rugăm să așteptați...",
+                 invalidEmail: "Una sau mai multe adrese de e-mail sunt nevalide. Vă rugăm să verificați.",
+                 scanningTitle: "Scanare / Verificare Software",
+                 enterDmc: "Introduceți sau scanați codul DMC:",
+                 checkSoftware: "VERIFICARE SOFTWARE",
+                 recentScans: "Scanări recente:",
+                 noRecentScans: "Nu există scanări recente.",
+                 statisticalAnalysis: "Analiză Statistică (Tot Timpul)",
+                 okVsNok: "OK vs NOK (Total)",
+                 nokBreakdown: "Defalcare Eșecuri NOK",
+                 exportTools: "Instrumente de Export:",
+                 recentWatchdogEvents: "Evenimente Recente Watchdog (din results.csv):",
+                 timestampHeader: "Marcaj de Timp",
+                 dmcHeader: "DMC",
+                 snrHeader: "SNR",
+                 reportFileHeader: "Fișier Raport",
+                 settingsFileHeader: "Fișier Setări",
+                 reportsFolderLabel: "1. Dosar Rapoarte (Watchdog / Cale Rețea)",
+                 settingsFolderLabel: "2. Dosar Setări (Fișiere Setări)",
+                 csvPathLabel: "3. Cale CSV (Locație fișier istoric)",
+                 emailRecipientsLabelLong: "4. Destinatari E-mail (NOK/Eroare) - separați prin virgule",
+                 settingsFileLabel: "Fișier Setări:",
+                 settingsDateLabel: "Dată Setări:",
+                 finalResultLabel: "REZULTAT FINAL:",
+                 detailedAnalysisTitle: "Analiză Software Detaliată",
+                 criticalSettingsTitle: "Setări Critice și Configurare",
+                 addRecipientButton: "+ Adaugă Destinatar",
+                 dmcLabelShort: "DMC:",
+                 snrLabelShort: "SNR:"
+             }
+        };
+        
+        let currentLanguage = 'en';
+        let T_current = T[currentLanguage]; 
+        const API_URL = 'http://127.0.0.1:5001';
+        // Polling Watchdoga (Live Session)
+        const POLLING_INTERVAL_MS = 3000; // POPRAWKA: Częstsze odświeżanie (3s)
+
+        // --- GLOBAL STATE & DOM MAPPING ---
+        const $ = (id) => document.getElementById(id);
+        const dmcInput = $('dmc-input'), checkButton = $('check-button'), settingsButton = $('settings-button'), historyButton = $('history-button'), analysisButton = $('analysis-button'), liveSessionButton = $('live-session-button'), themeToggle = $('theme-toggle'), languageToggle = $('language-toggle'), statusMessage = $('status-message');
+        const settingsPathInput = $('settings-path'), reportsPathInput = $('reports-path'), csvPathInput = $('csv-path'), browseSettingsBtn = $('browse-settings'), browseReportsBtn = $('browse-reports'), browseCsvBtn = $('browse-csv'), saveSettingsBtn = $('save-settings'), cancelSettingsBtn = $('cancel-settings'), mailRecipientsList = $('mail-recipients-list'), addRecipientBtn = $('add-recipient-button'), archiveToggle = $('archive-toggle'), clearEmailBtn = $('clear-email-button'), resetAllBtn = $('reset-all-button');
+        const resultsView = $('results-view'), settingsView = $('settings-view'), historyView = $('history-view'), dashboardView = $('dashboard-view'), analysisView = $('analysis-view');
+        const resultsTableBody = $('results-table-body'), resultDmc = $('result-dmc'), resultSnr = $('result-snr'), resultSettingsFile = $('result-settings-file'), resultSettingsDate = $('result-settings-date'), finalResult = $('final-result'), saveReportJpgBtn = $('save-report-jpg'), generateSmacJsonBtn = $('generate-smac-json');
+        const historyTableBody = $('history-table-body'), historyDateFrom = $('history-date-from'), historyDateTo = $('history-date-to'), historyApplyFilterBtn = $('history-apply-filter'), historyClearFilterBtn = $('history-clear-filter'), historyRefreshBtn = $('history-refresh'), exportHistoryCsvBtn = $('export-history-csv');
+        
+        // POPRAWKA: ZMIENIONO NAZWY CANVAS DLA WIDOKU ANALYSIS
+        const nokPieChartAnalysis = $('nok-pie-chart-analysis'), nokBarChartAnalysis = $('nok-bar-chart-analysis');
+        
+        const liveSessionHistory = $('live-session-history');
+        const statusDot = $('status-dot'), statusText = $('status-text');
+        const hwelIdInput = $('hwel-id-input'), btldIdInput = $('btld-id-input'), swflIdInput = $('swfl-id-input');
+        const resultsMetadata = $('results-metadata'), emptyResultsPlaceholder = $('empty-results-placeholder'), resultsTableWrapper = $('results-table-wrapper');
+        const recentScansList = $('recent-scans-list'); // Nowy element dla ostatnich ręcznych skanów
+
+        // Global State (jak w v2.4.1)
+        const DEFAULT_CONFIG = {
+          settingsFolder: "", reportsFolder: "", csvPath: "", language: "en", theme: "dark",
+          mailRecipients: [], archiveFiles: false
+        };
+        let config = { ...DEFAULT_CONFIG };
+        let globalHistoryData = [];
+        let historySort = { col: 'timestamp', asc: false };
+        let pieChartAnalysisInstance = null; let barChartAnalysisInstance = null; // Instancje dla Analysis
+        let currentResultData = null; 
+        
+        let liveSessionInterval = null; // Zmienna do przechowywania interwału Live Session
+        let liveSessionDisplayedSet = new Set(); // POPRAWKA: Śledzenie wyświetlonych elementów
+
+        // --- MANUAL SCANS LOGIC (Pobieranie z Server.py) ---
+        let recentManualScans = [];
+
+        async function loadRecentScans() {
+            try {
+                // Pobieranie z nowego endpointu (get-manual-scans)
+                const response = await fetch(`${API_URL}/api/get-manual-scans`);
+                recentManualScans = response.ok ? await response.json() : [];
+                renderRecentScans();
+            } catch (e) {
+                console.error("Error loading recent scans from API:", e);
+                recentManualScans = [];
+                renderRecentScans();
+            }
+        }
+
+        function saveRecentScan(scanData) { 
+             // Teraz tylko odświeżamy z serwera, po tym jak server.py sam się zalogował.
+             loadRecentScans();
+        }
+
+        function renderRecentScans() {
+            if (recentManualScans.length === 0) {
+                recentScansList.innerHTML = `<p style="color: var(--text-secondary); font-size: 0.9em; text-align: center;">No recent scans.</p>`;
+                return;
+            }
+
+            recentScansList.innerHTML = '';
+            recentManualScans.forEach((scan, index) => {
+                const resultStatus = scan.finalResult || 'ERROR';
+                const resultClass = resultStatus === 'OK' ? 'OK' : (resultStatus === 'NOK' ? 'NOK' : 'ERROR');
+                const time = scan.timestamp ? scan.timestamp.split(' ')[1] : 'N/A';
+
+                const div = document.createElement('div');
+                div.className = 'recent-scan-item';
+                div.dataset.index = index;
+                div.innerHTML = `
+                    <div>${scan.dmc} <span style="font-size: 0.8em; color: var(--text-secondary);">(${time})</span></div>
+                    <div class="recent-scan-status ${resultClass}">${resultStatus}</div>
+                `;
+                recentScansList.appendChild(div);
+
+                // Dodaj listenera do ponownego wyświetlenia wyniku
+                div.addEventListener('click', () => {
+                    displayManualScanResult(scan);
+                });
+            });
+        }
+        
+        function displayManualScanResult(scanData) {
+            showCentralView(resultsView); // Przełącz na widok wyników
+            clearStatus();
+            
+            // POPRAWKA: Musimy ustawić currentResultData, aby działał eksport SMAC/JPG
+            currentResultData = scanData; 
+            
+            const { dmc, snr, results, finalResult: fr, settingsFile, settingsDate, settingsHwelOriginalId, settingsBtldOriginalId, settingsSwflOriginalId, errorMessage } = scanData;
+            
+            // Wypełnienie metadanych
+            resultDmc.textContent = dmc; 
+            resultSnr.textContent = snr || 'N/A';
+            
+            // Uwzględnij, że wyniki mogą być zapisane w innym formacie (bez pełnych ścieżek)
+            const settingsFileName = settingsFile ? (settingsFile.split(/[\\/]/).pop()) : 'N/A';
+
+            resultSettingsFile.textContent = settingsFileName;
+            resultSettingsFile.title = settingsFile || '';
+            resultSettingsDate.textContent = settingsDate || 'N/A';
+            
+            resultsTableBody.innerHTML = '';
+            const isError = fr === 'ERROR' || !results || !Array.isArray(results);
+
+            if (isError) {
+                resultsTableBody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--status-error); font-weight: 600;">${errorMessage || t('internalError')}</td></tr>`;
+            } else {
+                 results.forEach(row => { 
+                    const tr = document.createElement('tr'); 
+                    const resultStatus = row.Result.toUpperCase();
+                    tr.className = resultStatus === 'OK' ? 'result-ok-row' : 'result-nok-row'; 
+                    const resultClass = resultStatus === 'OK' ? 'status-ok-text' : 'status-nok-text';
+                    tr.innerHTML = `<td>${row.Field}</td><td>${row.Report || 'N/A'}</td><td>${row.Settings || 'N/A'}</td><td class="${resultClass}">${resultStatus}</td>`; 
+                    resultsTableBody.appendChild(tr); 
+                });
+            }
+            
+            // Wynik końcowy
+            finalResult.textContent = fr === 'OK' ? t('resultPass') : (fr === 'NOK' ? t('resultFail') : t('resultError')); 
+            finalResult.className = fr === 'OK' ? 'status-ok-text' : (fr === 'NOK' ? 'status-nok-text' : 'status-error-text');
+            
+            // Pola SMAC (POPRAWKA: Sprawdzenie istnienia wartości przed ustawieniem display: 'block')
+            hwelIdInput.value = settingsHwelOriginalId || ''; hwelIdInput.style.display = hwelIdInput.value ? 'block' : 'none';
+            btldIdInput.value = settingsBtldOriginalId || ''; btldIdInput.style.display = btldIdInput.value ? 'block' : 'none';
+            swflIdInput.value = settingsSwflOriginalId || ''; swflIdInput.style.display = swflIdInput.value ? 'block' : 'none';
+            
+            // Upewnij się, że bloki są widoczne
+            emptyResultsPlaceholder.style.display = 'none';
+            resultsMetadata.style.display = 'block';
+            resultsTableWrapper.style.display = 'block';
+        }
+
+        
+        // --- TRANSLATION & THEME ---
+        const t = (key) => T[currentLanguage][key] || T['en'][key] || key;
+        
+        // POPRAWKA: Użycie fetch do zapisu języka (async)
+        async function setLanguage(lang) {
+            currentLanguage = lang; T_current = T[lang] || T.en;
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                if (T_current[el.dataset.i18n]) {
+                    el.textContent = T_current[el.dataset.i18n];
+                }
+            });
+            dmcInput.placeholder = "Fxx-xx-xxxxxx"; 
+            config.language = lang;
+            await fetch(`${API_URL}/api/save-config`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(config) });
+        }
+        
+        // POPRAWKA: Użycie fetch do zapisu motywu (async)
+        async function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme); 
+            config.theme = theme;
+            document.body.setAttribute('data-theme', theme); 
+            await fetch(`${API_URL}/api/save-config`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(config) }); 
+        }
+
+        // --- UI UTILS (Nowy Styl) ---
+        function stopLiveSessionPolling() {
+            if (liveSessionInterval) {
+                clearInterval(liveSessionInterval);
+                liveSessionInterval = null;
+            }
+        }
+        
+        function showCentralView(viewElement) {
+            // Zatrzymaj polling Live Session, gdy widok jest zmieniany
+            stopLiveSessionPolling();
+            clearStatus();
+            
+            [resultsView, settingsView, historyView, dashboardView, analysisView].forEach(view => {
+                if(view) view.style.display = 'none';
+            });
+            viewElement.style.display = 'block';
+            
+            // POPRAWKA: Dodanie automatycznego ładowania bazy danych i włączenie Live Session
+            if (viewElement === historyView) loadHistory(); // 2. Baza Danych (automatyczne ładowanie)
+            if (viewElement === dashboardView) { 
+                // Reset Setu przy wchodzeniu (opcjonalne, ale bezpieczniejsze)
+                liveSessionHistory.innerHTML = `<p style="color: var(--text-secondary); text-align: center;">${t('loadingMsg')}</p>`;
+                liveSessionDisplayedSet.clear(); 
+                fetchLiveSessionEvents(); // 1. Live Session (natychmiastowe ładowanie)
+                liveSessionInterval = setInterval(fetchLiveSessionEvents, POLLING_INTERVAL_MS); // 1. Live Session (Polling co 3s)
+            } 
+            if (viewElement === analysisView) fetchStatsAndRenderAnalysis(); // Analiza (wykresy)
+            if (viewElement === settingsView) checkWatchdogStatus();
+        }
+
+        function showStatus(messageKey, type = 'error', ...args) {
+            let message = t(messageKey) || messageKey; 
+            if (args.length) { 
+                message = message.replace('{0}', args[0] || 'N/A').replace('{1}', args[1] || 'N/A'); 
+            }
+            statusMessage.textContent = message; 
+            statusMessage.className = `status-message-panel show ${type}`;
+        }
+        function clearStatus() { statusMessage.textContent = ''; statusMessage.className = 'status-message-panel'; }
+
+        // --- WATCHDOG STATUS ---
+        async function checkWatchdogStatus() {
+            try {
+                const response = await fetch(`${API_URL}/api/status`); 
+                if (!response.ok) throw new Error('Server not responding');
+                const status = await response.json();
+
+                statusDot.className = 'status-dot nok';
+                statusText.textContent = t('notConnected');
+                settingsButton.classList.remove('pulse-required');
+                
+                if (status.status === 'READY' && status.is_available) {
+                    statusDot.className = 'status-dot ok';
+                    statusText.textContent = t('connected');
+                } else if (status.status === 'SETUP_REQUIRED') {
+                    statusDot.className = 'status-dot nok';
+                    statusText.textContent = t('setupRequired');
+                    settingsButton.classList.add('pulse-required'); 
+                } else if (status.status === 'DISCONNECTED') {
+                    statusDot.className = 'status-dot nok';
+                    statusText.textContent = t('notConnected');
+                } else if (status.status === 'NETWORK_ERROR') {
+                    statusDot.className = 'status-dot nok';
+                    statusText.textContent = t('networkError');
+                }
+
+            } catch (error) {
+                statusDot.className = 'status-dot nok';
+                statusText.textContent = t('notConnected');
+                settingsButton.classList.remove('pulse-required');
+            }
+        }
+
+        // --- CONFIG & SETUP ---
+        async function loadConfig() { 
+            try {
+                const response = await fetch(`${API_URL}/api/load-config`); 
+                if (!response.ok) throw new Error(t('internalError'));
+                const loadedConfig = await response.json(); 
+                config = { ...DEFAULT_CONFIG, ...loadedConfig };
+                
+                settingsPathInput.value = config.settingsFolder; 
+                reportsPathInput.value = config.reportsFolder; 
+                csvPathInput.value = config.csvPath; 
+                archiveToggle.checked = config.archiveFiles;
+                renderEmailRecipients(config.mailRecipients);
+                
+                setTheme(config.theme); 
+                languageToggle.value = config.language;
+                // Poprawka: Wymuszenie załadowania tłumaczeń przy starcie
+                setLanguage(config.language); 
+                
+            } catch (error) { 
+                showStatus(error.message, 'error'); 
+            }
+        }
+        
+        async function onSaveSettings() { 
+            const emailInputs = mailRecipientsList.querySelectorAll('input'); 
+            const newRecipients = []; 
+            let allValid = true; 
+            
+            for (const input of emailInputs) { 
+                const email = input.value.trim(); 
+                if (email === "") continue; 
+                if (!email.includes('@') || !email.includes('.')) { 
+                    allValid = false; 
+                    input.style.borderColor = 'var(--status-error)'; 
+                } else { 
+                    input.style.borderColor = 'var(--border-color)'; 
+                    newRecipients.push(email); 
+                } 
+            } 
+            
+            if (!allValid) { 
+                alert(t('invalidEmail'));
+                return; 
+            } 
+            
+            config.settingsFolder = settingsPathInput.value; 
+            config.reportsFolder = reportsPathInput.value; 
+            config.csvPath = csvPathInput.value; 
+            config.archiveFiles = archiveToggle.checked; 
+            config.mailRecipients = newRecipients; 
+            
+            try { 
+                await fetch(`${API_URL}/api/save-config`, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify(config) 
+                }); 
+                showCentralView(resultsView);
+                showStatus('saveSuccess', 'success');
+                checkWatchdogStatus();
+            } catch (error) { 
+                showStatus('internalError', 'error'); 
+            } 
+        }
+
+        async function onCancelSettings() {
+            settingsPathInput.value = config.settingsFolder; reportsPathInput.value = config.reportsFolder; csvPathInput.value = config.csvPath; archiveToggle.checked = config.archiveFiles; 
+            renderEmailRecipients(config.mailRecipients); 
+            showCentralView(resultsView);
+            clearStatus();
+        }
+        
+        async function onResetAllSettings() {
+            if (!confirm(t('resetConfirm'))) { return; }
+            
+            showCentralView(resultsView); 
+            showStatus(t('resetConfirm').split('\n')[0].replace('Jesteś pewien?', '') + '... ' + t('loadingMsg'), 'loading');
+               
+            try {
+                const response = await fetch(`${API_URL}/api/factory-reset`, { method: 'POST' });
+                const result = await response.json();
+       
+                if (result.success) {
+                    showStatus(t('resetSuccess'), 'success');
+                    setTimeout(() => { location.reload(); }, 2000);
+                } else {
+                    throw new Error(result.error || 'Unknown reset error');
+                }
+            } catch (error) {
+                alert(`Factory reset failed: ${error.message}`);
+                clearStatus();
+            }
+        }
+        
+        async function handleBrowse(inputElement) { 
+            try { 
+                const response = await fetch(`${API_URL}/api/browse-folder`); 
+                const result = await response.json(); 
+                if (result.success && result.path) { 
+                    inputElement.value = result.path; 
+                } else if (result.error !== "Cancelled") { 
+                    alert(`${t('browseButton')} error: ${result.error}`); 
+                } 
+            } catch (error) { 
+                alert(`Server error during folder selection: ${error.message}`); 
+            } 
+        }
+
+        function renderEmailRecipients(recipients = []) { 
+            mailRecipientsList.innerHTML = ''; 
+            if (recipients.length === 0) { addEmailRecipient(""); } else { recipients.forEach(addEmailRecipient); } 
+        }
+        function addEmailRecipient(email = "") { 
+            const div = document.createElement('div'); 
+            div.className = 'email-recipient-item'; 
+            div.innerHTML = `<input type="email" class="input-field" style="height: 44px; font-size: 1em;" placeholder="quality.support@company.com" value="${email.trim()}"><button class="remove-recipient-button" title="Remove">&ndash;</button>`; 
+            mailRecipientsList.appendChild(div); 
+        }
+        function onClearEmail() { mailRecipientsList.innerHTML = ''; addEmailRecipient(""); }
+        
+        // --- CHECK LOGIC (Zapis do Server.py) ---
+        async function onCheckButtonPress() {
+            // Natychmiastowe przełączenie na widok wyników
+            showCentralView(resultsView);
+            
+            clearStatus(); currentResultData = null; 
+            
+            const dmc = dmcInput.value.trim();
+            if (!dmc) { showStatus('msgDmcEmpty', 'error'); return; }
+            if (!config.settingsFolder || !config.reportsFolder) { showStatus('msgPathsNotSet', 'error'); return; }
+            
+            checkButton.disabled = true; 
+            checkButton.querySelector('span').textContent = t('loadingMsg'); 
+            showStatus('loadingMsg', 'loading');
+            
+            // Wyczyść stary wynik
+            emptyResultsPlaceholder.style.display = 'none';
+            resultsMetadata.style.display = 'none';
+            resultsTableWrapper.style.display = 'block';
+            resultsTableBody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-secondary); font-weight: 500;">${t('loadingMsg')}</td></tr>`;
+
+
+            try {
+                const response = await fetch(`${API_URL}/api/run-check`, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ dmc }) 
+                });
+                const result = await response.json();
+                
+                // Zapisz pełny obiekt do LocalStorage (Server.py zrobi teraz trwały log)
+                let dataToDisplay = {};
+                let finalResultStatus = 'ERROR';
+
+                if (result.success) {
+                    currentResultData = result.data; 
+                    dataToDisplay = result.data;
+                    finalResultStatus = dataToDisplay.finalResult;
+                    
+                    // Wypełnienie UI
+                    resultDmc.textContent = dataToDisplay.dmc; 
+                    resultSnr.textContent = dataToDisplay.snr;
+                    resultSettingsFile.textContent = dataToDisplay.settingsFile ? dataToDisplay.settingsFile.split(/[\\/]/).pop() : 'N/A';
+                    resultSettingsFile.title = dataToDisplay.settingsFile || '';
+                    resultSettingsDate.textContent = dataToDisplay.settingsDate || 'N/A';
+                    
+                    resultsTableBody.innerHTML = '';
+                    dataToDisplay.results.forEach(row => { 
+                        const tr = document.createElement('tr'); 
+                        const resultStatus = row.Result.toUpperCase();
+                        tr.className = resultStatus === 'OK' ? 'result-ok-row' : 'result-nok-row'; 
+                        const resultClass = resultStatus === 'OK' ? 'status-ok-text' : 'status-nok-text';
+                        tr.innerHTML = `<td>${row.Field}</td><td>${row.Report || 'N/A'}</td><td>${row.Settings || 'N/A'}</td><td class="${resultClass}">${resultStatus}</td>`; 
+                        resultsTableBody.appendChild(tr); 
+                    });
+                    
+                    const isPass = dataToDisplay.finalResult === 'OK'; 
+                    finalResult.textContent = isPass ? t('resultPass') : t('resultFail'); 
+                    finalResult.className = isPass ? 'status-ok-text' : 'status-nok-text';
+                    
+                    // Pola SMAC (POPRAWKA: Używamy tego samego mechanizmu co w displayManualScanResult)
+                    hwelIdInput.value = dataToDisplay.settingsHwelOriginalId || ''; hwelIdInput.style.display = hwelIdInput.value ? 'block' : 'none';
+                    btldIdInput.value = dataToDisplay.settingsBtldOriginalId || ''; btldIdInput.style.display = btldIdInput.value ? 'block' : 'none';
+                    swflIdInput.value = dataToDisplay.settingsSwflOriginalId || ''; swflIdInput.style.display = swflIdInput.value ? 'block' : 'none';
+
+                    clearStatus(); 
+                    
+                } else {
+                    // Obsługa BŁĘDU Z SERWERA 
+                    const errorMessage = t(result.error) || result.error || t('internalError');
+                    finalResultStatus = 'ERROR';
+
+                    finalResult.textContent = t('resultError'); 
+                    finalResult.className = 'status-error-text';
+                    resultDmc.textContent = result.dmc || dmc; 
+                    resultSnr.textContent = result.snr || 'N/A';
+                    resultSettingsFile.textContent = 'N/A'; 
+                    resultSettingsDate.textContent = 'N/A';
+                    resultsTableBody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--status-error); font-weight: 600;">${errorMessage}</td></tr>`;
+                    
+                    showStatus(result.error, 'error', result.dmc, result.snr); 
+                }
+            } catch (error) { 
+                showStatus('internalError', 'error'); 
+                console.error('Fetch error:', error); 
+                
+                finalResultStatus = 'ERROR';
+                
+                finalResult.textContent = t('resultError'); 
+                finalResult.className = 'status-error-text';
+                resultsTableBody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--status-error); font-weight: 600;">${t('internalError')}</td></tr>`;
+                
+            } finally { 
+                // POPRAWKA: Natychmiastowe odświeżenie listy Recent Scans!
+                loadRecentScans();
+                
+                resultsMetadata.style.display = 'block';
+                checkButton.disabled = false; 
+                checkButton.querySelector('span').textContent = t('runCheck'); 
+            }
+        }
+
+
+        // --- DASHBOARD (LIVE SESSION) ---
+        async function fetchLiveSessionEvents() {
+            try {
+                const responseHistory = await fetch(`${API_URL}/api/get-history`);
+                const fullHistory = responseHistory.ok ? await responseHistory.json() : [];
+                
+                // Pobierz 20 najnowszych (żeby mieć pewność, że nic nie uciekło)
+                const recentEvents = fullHistory.reverse().slice(0, 20); 
+                
+                if (recentEvents.length === 0) {
+                     if (liveSessionHistory.innerHTML.includes('Loading')) {
+                        liveSessionHistory.innerHTML = `<p style="color: var(--text-secondary); text-align: center;">No Watchdog events recorded yet (results.csv is empty).</p>`;
+                     }
+                     return;
+                }
+                
+                // Jeśli to pierwsze ładowanie (lub po wyczyszczeniu), wyczyść "Loading..."
+                if (liveSessionHistory.innerHTML.includes('Loading')) {
+                    liveSessionHistory.innerHTML = '';
+                }
+
+                // Odwracamy kolejność, żeby najnowsze były na dole listy przy iteracji, ale my używamy prepend, więc:
+                // Chcemy dodać TYLKO NOWE elementy na górę (prepend).
+                // recentEvents[0] to NAJNOWSZY.
+                
+                // Iterujemy od NAJSTARSZEGO z pobranych do NAJNOWSZEGO, sprawdzając czy już są.
+                // Ale chwila, prepend wstawia na początek. Więc jeśli mamy [New1, New2], to wstawiamy New2, potem New1? Nie.
+                // Jeśli wstawiamy prepend, to musimy wstawiać od najstarszego z nowych do najnowszego z nowych?
+                // Nie, najnowszy ma być na samej górze.
+                
+                // Przykład: Mamy [B, A]. Pobieramy [C, B, A]. C jest nowy.
+                // Wstawiamy C na górę.
+                
+                // Znajdź nowe elementy
+                const newItems = [];
+                recentEvents.forEach(row => {
+                    const uniqueId = (row.timestamp || '') + '_' + (row.dmc || '');
+                    if (!liveSessionDisplayedSet.has(uniqueId)) {
+                        newItems.push({ row, uniqueId });
+                        liveSessionDisplayedSet.add(uniqueId);
+                    }
+                });
+                
+                // Jeśli nie ma nowych, koniec
+                if (newItems.length === 0) return;
+
+                // Sortujemy nowe tak, żeby najnowsze były dodawane jako ostatnie do newItems (żeby zachować kolejność przy prepend? Nie).
+                // recentEvents jest od najnowszego [0].
+                // newItems ma [Najnowszy, Starszy...] (bo iterowaliśmy po recentEvents).
+                // Jeśli zrobimy prepend dla Najnowszego, będzie na górze. Potem dla Starszego - będzie nad Najnowszym. ŹLE.
+                // Musimy wstawiać od "najstarszego z nowych" do "najnowszego z nowych".
+                
+                newItems.reverse().forEach(({ row, uniqueId }) => {
+                    const status = (row.final || 'ERROR').toUpperCase();
+                    const resultTextClass = status === 'OK' ? 'OK' : (status === 'NOK' ? 'NOK' : 'ERROR');
+                    const dmcName = row.dmc || 'N/A';
+                    const time = (row.timestamp || '').split(' ')[1] || '';
+                    
+                    const div = document.createElement('div');
+                    div.className = 'live-session-item';
+                    
+                    // Animacja tylko dla nowych
+                    div.classList.add('new-entry'); 
+                    
+                    div.innerHTML = `
+                        <div>${time} | <strong>${dmcName}</strong></div> 
+                        <div class="live-session-result ${resultTextClass}">${status}</div>
+                    `;
+                    
+                    // Wstawiamy na początek listy
+                    liveSessionHistory.prepend(div);
+                });
+                
+                // Ogranicz liczbę elementów w DOM do 50
+                while (liveSessionHistory.children.length > 50) {
+                    const lastChild = liveSessionHistory.lastElementChild;
+                    // Musimy usunąć też z Setu? Trudno zidentyfikować ID z DOM bez dataset.
+                    // Ale Set służy tylko do sprawdzania "czy dodać". Jak usuniemy z DOM, to przy następnym fetchu (jeśli nadal jest w ostatnich 20) by dodało znowu.
+                    // Więc NIE usuwamy z Setu tych co są w recentEvents.
+                    // Możemy czyścić Set okresowo, ale przy 50 elementach to nie problem.
+                    liveSessionHistory.removeChild(lastChild);
+                }
+
+
+            } catch (error) { 
+                console.error("Failed to load live session data:", error); 
+            }
+        }
+
+
+        // --- HISTORY (DB VIEWER) ---
+        // POPRAWKA: loadHistory wywoływana jest teraz automatycznie
+        async function loadHistory() { 
+            historyTableBody.innerHTML = `<tr><td colspan="6" style="text-align: center;">${t('loadingMsg')}</td></tr>`;
+            try { 
+                const response = await fetch(`${API_URL}/api/get-history`); 
+                if (!response.ok) throw new Error(t('internalError')); 
+                globalHistoryData = await response.json(); 
+                if (globalHistoryData.error) throw new Error(globalHistoryData.error); 
+                applyHistoryFilter(); 
+            } catch (error) { 
+                historyTableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--status-error);">${error.message}</td></tr>`; 
+            } 
+        }
+
+        function renderHistoryTable(data) { 
+            if (data.length === 0) { 
+                historyTableBody.innerHTML = `<tr><td colspan="6" style="text-align: center;">${t('historyTitle').replace('(DB Viewer)', '')} ${t('msgReportNotFound')}</td></tr>`; 
+                return; 
+            } 
+            historyTableBody.innerHTML = ''; 
+            data.forEach(row => { 
+                const tr = document.createElement('tr'); 
+                let resultClass = ''; 
+                if (row.final === 'OK') resultClass = 'result-ok'; 
+                if (row.final === 'NOK') resultClass = 'result-nok'; 
+                const resultTextClass = row.final === 'OK' ? 'status-ok-text' : (row.final === 'NOK' ? 'status-nok-text' : 'status-error-text');
+                tr.innerHTML = `<td>${row.timestamp || ''}</td><td>${row.dmc || ''}</td><td>${row.snr || ''}</td><td class="${resultTextClass}">${row.final || ''}</td><td title="${row.report_file || ''}">${(row.report_file || '').split(/[\\/]/).pop()}</td><td title="${row.settings_file || ''}">${(row.settings_file || '').split(/[\\/]/).pop()}</td>`; 
+                historyTableBody.appendChild(tr); 
+            }); 
+        }
+
+        function applyHistoryFilter() { 
+            let filteredData = [...globalHistoryData]; 
+            const fromDate = historyDateFrom.value; 
+            const toDate = historyDateTo.value; 
+            // Wprowadzenie filtra DMC
+            const dmcFilter = document.getElementById('history-dmc-filter') ? document.getElementById('history-dmc-filter').value.toUpperCase() : '';
+
+            if (fromDate) { filteredData = filteredData.filter(row => (row.timestamp || '').split(' ')[0] >= fromDate); } 
+            if (toDate) { filteredData = filteredData.filter(row => (row.timestamp || '').split(' ')[0] <= toDate); } 
+            // Aplikacja filtra DMC
+            if (dmcFilter) { filteredData = filteredData.filter(row => (row.dmc || '').toUpperCase().includes(dmcFilter)); } 
+            
+            sortHistoryData(filteredData); 
+            renderHistoryTable(filteredData); 
+        }
+
+        function clearHistoryFilter() { 
+            historyDateFrom.value = ''; 
+            historyDateTo.value = ''; 
+            if (document.getElementById('history-dmc-filter')) {
+                document.getElementById('history-dmc-filter').value = '';
+            }
+            applyHistoryFilter(); 
+        }
+
+        function onHistorySort(e) { 
+            const th = e.target.closest('th.sortable'); if (!th) return; 
+            const col = th.dataset.col; 
+            if (historySort.col === col) { historySort.asc = !historySort.asc; } else { historySort.col = col; historySort.asc = true; } 
+            document.querySelectorAll('#history-table th.sortable').forEach(h => { h.classList.remove('sorted-asc', 'sorted-desc'); h.querySelector('.sort-icon').innerHTML = ''; }); 
+            th.classList.add(historySort.asc ? 'sorted-asc' : 'sorted-desc'); th.querySelector('.sort-icon').innerHTML = historySort.asc ? '▲' : '▼'; 
+            applyHistoryFilter(); 
+        }
+
+        function sortHistoryData(data) { 
+            const { col, asc } = historySort; 
+            data.sort((a, b) => { 
+                let valA = a[col] || ''; let valB = b[col] || ''; 
+                if (valA < valB) return asc ? -1 : 1; 
+                if (valA > valB) return asc ? 1 : -1; return 0; 
+            }); 
+        }
+
+        // NOWA FUNKCJA: Eksport danych widocznych w tabeli do CSV (standard przecinkowy)
+        async function exportHistoryToCsv() {
+            // Użyjemy już przefiltrowanych danych z globalHistoryData, ale musimy uwzględnić aktualny filtr DMC
+            let filteredData = [...globalHistoryData]; 
+            const fromDate = historyDateFrom.value; 
+            const toDate = historyDateTo.value; 
+            const dmcFilter = document.getElementById('history-dmc-filter') ? document.getElementById('history-dmc-filter').value.toUpperCase() : '';
+
+            if (fromDate) { filteredData = filteredData.filter(row => (row.timestamp || '').split(' ')[0] >= fromDate); } 
+            if (toDate) { filteredData = filteredData.filter(row => (row.timestamp || '').split(' ')[0] <= toDate); } 
+            if (dmcFilter) { filteredData = filteredData.filter(row => (row.dmc || '').toUpperCase().includes(dmcFilter)); } 
+            sortHistoryData(filteredData); // Upewniamy się, że sortowanie jest zgodne z widokiem
+
+            if (filteredData.length === 0) {
+                alert("No data to export based on current filters.");
+                return;
+            }
+
+            try {
+                // Wysyłamy dane do serwera, aby ten bezpiecznie sformatował CSV
+                const response = await fetch(`${API_URL}/api/export-history-csv`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ data: filteredData })
+                });
+
+                if (!response.ok) throw new Error('Server failed to generate CSV');
+                
+                const result = await response.json();
+                if (!result.success) throw new Error(result.error || 'Unknown server error during CSV generation');
+
+                const csvString = result.csv_data;
+                const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+                
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `History_Export_${new Date().toISOString().slice(0, 10)}.csv`;
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                alert(`Exported ${filteredData.length} records to CSV (comma-separated).`);
+
+            } catch (error) {
+                console.error('Export Error:', error);
+                alert(`Export failed: ${error.message}`);
+            }
+        }
+
+        
+        // --- ANALYSIS (TYLKO WYKRESY) ---
+        async function fetchStatsAndRenderAnalysis() {
+            // Wyczyść stare instancje
+            if (pieChartAnalysisInstance) pieChartAnalysisInstance.destroy(); 
+            if (barChartAnalysisInstance) barChartAnalysisInstance.destroy();
+            
+            try {
+                const responseStats = await fetch(`${API_URL}/api/get-stats`); 
+                if (!responseStats.ok) throw new Error('Failed to fetch stats'); 
+                const stats = await responseStats.json();
+                
+                const isDarkMode = config.theme === 'dark'; 
+                const textColor = isDarkMode ? 'rgba(248, 249, 250, 0.8)' : 'rgba(11, 15, 16, 0.8)'; 
+                
+                // 1. Wykres Kołowy (OK vs NOK)
+                const pieData = { labels: ['OK', 'NOK'], datasets: [{ data: [stats.total_ok, stats.total_nok], 
+                    backgroundColor: [ getComputedStyle(document.documentElement).getPropertyValue('--status-ok'), 
+                    getComputedStyle(document.documentElement).getPropertyValue('--status-error') ], 
+                    borderColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-secondary'), borderWidth: 2 }] };
+                
+                pieChartAnalysisInstance = new Chart(nokPieChartAnalysis, { 
+                    type: 'doughnut', data: pieData, options: { responsive: true, maintainAspectRatio: false, plugins: { 
+                        legend: { 
+                            display: true, 
+                            position: 'top', 
+                            align: 'center', 
+                            labels: { 
+                                boxWidth: 15, 
+                                padding: 8, 
+                                font: { size: 11 },
+                                color: textColor 
+                            } 
+                        }, title: { display: false } } } 
+                });
+
+                // 2. Wykres Słupkowy (NOK Breakdown)
+                const barLabels = Object.keys(stats.nok_details); 
+                const barValues = Object.values(stats.nok_details);
+                const barData = { 
+                    labels: barLabels, 
+                    datasets: [{ label: 'NOK Count', data: barValues, 
+                        backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--status-error'), 
+                        borderColor: getComputedStyle(document.documentElement).getPropertyValue('--status-error'), borderWidth: 1 }] 
+                };
+                barChartAnalysisInstance = new Chart(nokBarChartAnalysis, { 
+                    type: 'bar', data: barData, options: { responsive: true, maintainAspectRatio: false, 
+                        layout: {
+                            padding: {
+                                left: 10,
+                                right: 10,
+                                top: 5,
+                                bottom: 5
+                            }
+                        },
+                        scales: { y: { beginAtZero: true, ticks: { color: textColor, padding: 5, font: { size: 10 } }, grid: { color: 'rgba(0,0,0,0)' } }, 
+                        x: { ticks: { color: textColor, font: { size: 10 } }, grid: { color: 'rgba(0,0,0,0)' } } }, 
+                        plugins: { 
+                            legend: { 
+                                display: true, 
+                                position: 'top', 
+                                align: 'center', 
+                                labels: { 
+                                    boxWidth: 15, 
+                                    padding: 8, 
+                                    font: { size: 11 },
+                                    color: textColor 
+                                } 
+                            }, title: { display: false } } } 
+                });
+
+
+            } catch (error) { 
+                console.error("Failed to load analysis data:", error); 
+                document.getElementById('analysis-charts').innerHTML = `<p style="color: var(--status-error); text-align: center; padding: 50px;">Failed to load analysis data from server.</p>`;
+            }
+        }
+        
+        // --- POZOSTAŁE FUNKCJE ---
+        function startStatusPolling() {
+            // Polling Watchdoga (status połączenia) - działa cały czas
+            setInterval(checkWatchdogStatus, POLLING_INTERVAL_MS);
+            checkWatchdogStatus(); 
+        }
+
+        // --- LISTENERS ---
+        function setupListeners() {
+            dmcInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') checkButton.click(); });
+            checkButton.addEventListener('click', onCheckButtonPress);
+            
+            // Reorganizacja przycisków w headerze
+            settingsButton.addEventListener('click', () => showCentralView(settingsView));
+            historyButton.addEventListener('click', () => showCentralView(historyView));
+            analysisButton.addEventListener('click', () => showCentralView(analysisView)); // Analiza (wykresy)
+            liveSessionButton.addEventListener('click', () => showCentralView(dashboardView)); // Live Session (Watchdog)
+            
+            // ... (pozostałe listenery) ...
+            browseSettingsBtn.addEventListener('click', () => handleBrowse(settingsPathInput));
+            browseReportsBtn.addEventListener('click', () => handleBrowse(reportsPathInput));
+            browseCsvBtn.addEventListener('click', () => handleBrowse(csvPathInput));
+            cancelSettingsBtn.addEventListener('click', onCancelSettings);
+            saveSettingsBtn.addEventListener('click', onSaveSettings);
+            addRecipientBtn.addEventListener('click', () => addEmailRecipient(""));
+            mailRecipientsList.addEventListener('click', (e) => { if (e.target.classList.contains('remove-recipient-button')) { e.target.closest('.email-recipient-item').remove(); } });
+            clearEmailBtn.addEventListener('click', onClearEmail);
+            resetAllBtn.addEventListener('click', onResetAllSettings);
+            
+            saveReportJpgBtn.addEventListener('click', onSaveReportJPG);
+            generateSmacJsonBtn.addEventListener('click', onGenerateSmacJson);
+            
+            // Baza Danych (odświeżanie)
+            exportHistoryCsvBtn.addEventListener('click', exportHistoryToCsv); // NOWY PRZYCISK EKSPORTU
+            historyApplyFilterBtn.addEventListener('click', applyHistoryFilter);
+            historyClearFilterBtn.addEventListener('click', clearHistoryFilter);
+            historyRefreshBtn.addEventListener('click', loadHistory); 
+            $('history-table').querySelector('thead').addEventListener('click', onHistorySort);
+            
+            // POPRAWKA: Przełączniki UI
+            languageToggle.addEventListener('change', (e) => { setLanguage(e.target.value); });
+            themeToggle.addEventListener('click', () => { 
+                const newTheme = config.theme === 'light' ? 'dark' : 'light'; 
+                setTheme(newTheme); 
+            });
+        }
+        
+        // --- START ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadConfig(); 
+            loadRecentScans(); // Wczytaj historię ręcznych skanów
+            setupListeners();
+            startStatusPolling();
+            showCentralView(dashboardView); 
+        });
+
+        // POZOSTAŁE FUNKCJE WERSJI 2.4.1 (dla kompatybilności)
+        
+        async function onSaveReportJPG() {
+            if (!currentResultData || (currentResultData && !currentResultData.dmc)) {
+                alert("No result data to save. Please run a check first.");
+                return;
+            }
+
+            const mainContent = $('results-view'); 
+            
+            // --- POPRAWKA: Dodanie marginesów do JPG dla estetyki ---
+            const originalPadding = mainContent.style.padding;
+            mainContent.style.padding = '40px'; 
+            
+            const headerClone = document.createElement('div');
+            headerClone.innerHTML = `
+                <h1 style="color: var(--accent-color); text-align: center; padding-top: 20px;">Software Checker Report</h1>
+                <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 10px 0;">
+            `;
+            mainContent.prepend(headerClone);
+            
+            const generator = $('smac-generator');
+            const originalGeneratorDisplay = generator ? generator.style.display : 'none';
+            if (generator) generator.style.display = 'none';
+
+            try {
+                if (typeof html2canvas === 'undefined') {
+                    alert("Error: html2canvas library not loaded. Make sure html2canvas.min.js is in the /app/files/ folder.");
+                    return;
+                }
+              
+                const canvas = await html2canvas(mainContent, {
+                    scale: 2,
+                    useCORS: true,
+                    backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-primary')
+                });
+
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
+                const link = document.createElement('a');
+                link.href = dataUrl;
+                const dmc = resultDmc.textContent;
+                const date = new Date().toISOString().slice(0, 19).replace(/:/g, '-').replace('T', '_');
+                link.download = `Report_DMC_${dmc}_${date}.jpg`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+          
+            } catch(err) {
+                console.error("Error creating JPG:", err);
+                alert("Failed to generate JPG report.");
+            } finally {
+                headerClone.remove();
+                if (generator) generator.style.display = originalGeneratorDisplay;
+                mainContent.style.padding = originalPadding; // Przywrócenie oryginalnego paddingu
+            }
+        }
+
+        async function onGenerateSmacJson() {
+            if (!currentResultData || (currentResultData && !currentResultData.dmc)) {
+                alert("Cannot generate SMAC JSON. No valid result data available. Please run a check first.");
+                return;
+            }
+          
+            const payload = {
+                hwelId: currentResultData.settingsHwelOriginalId || "",
+                btldId: currentResultData.settingsBtldOriginalId || "",
+                swflId: currentResultData.settingsSwflOriginalId || ""
+            };
+          
+            try {
+                const response = await fetch(`${API_URL}/api/generate-smac-json`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+                });
+              
+                if (!response.ok) { throw new Error(t('internalError')); }
+              
+                const smacJson = await response.json();
+              
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(smacJson, null, 2));
+                const downloadAnchorNode = document.createElement('a');
+                downloadAnchorNode.setAttribute("href", dataStr);
+                const snr = currentResultData.snr || "UNKNOWN_SNR";
+                downloadAnchorNode.setAttribute("download", `SMAC_${snr}.json`);
+                document.body.appendChild(downloadAnchorNode); 
+                downloadAnchorNode.click();
+                document.body.removeChild(downloadAnchorNode);
+          
+            } catch (error) {
+                console.error("Error generating or downloading SMAC JSON:", error);
+                alert(`${t('generateSmacJsonButton')} failed: ${error.message}`);
+            }
+        }
+        
+        })(); 
+    </script>
+</html>

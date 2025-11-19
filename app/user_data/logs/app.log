@@ -1,0 +1,10 @@
+2025-11-19 21:14:36,087 - INFO - ========================================
+2025-11-19 21:14:36,087 - INFO - === PID: 25260 Starting Software Checker Server (v2.4.1 + Final Logics) ===
+2025-11-19 21:14:36,087 - INFO - Step 1: Early logging initialized. Attempting library imports...
+2025-11-19 21:14:36,088 - CRITICAL - === CRITICAL IMPORT FAILURE: No module named 'lxml' ===
+2025-11-19 21:14:36,088 - CRITICAL - Server cannot start. Missing key library.
+2025-11-19 21:15:31,911 - INFO - ========================================
+2025-11-19 21:15:31,912 - INFO - === PID: 17888 Starting Software Checker Server (v2.4.1 + Final Logics) ===
+2025-11-19 21:15:31,912 - INFO - Step 1: Early logging initialized. Attempting library imports...
+2025-11-19 21:15:31,913 - CRITICAL - === CRITICAL IMPORT FAILURE: No module named 'lxml' ===
+2025-11-19 21:15:31,913 - CRITICAL - Server cannot start. Missing key library.

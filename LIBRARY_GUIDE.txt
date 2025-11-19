@@ -1,0 +1,66 @@
+# Przewodnik po zainstalowanych bibliotekach Python
+
+Ten plik opisuje biblioteki zainstalowane przez skrypt `setup_dev_env.bat`. Są to narzędzia wykorzystywane w tym projekcie oraz ogólnie przydatne w tworzeniu aplikacji w Pythonie.
+
+---
+
+## 1. Biblioteki Projektu (Core)
+Te biblioteki są kluczowe dla działania Software Checkera.
+
+### `flask` / `flask-cors`
+- **Do czego służy:** Tworzenie serwera WWW (backendu) i obsługi zapytań HTTP. `flask-cors` pozwala na komunikację między frontendem (HTML/JS) a backendem bez blokad przeglądarki.
+- **Przykład:**
+  ```python
+  from flask import Flask
+  app = Flask(__name__)
+
+  @app.route('/')
+  def hello():
+      return "Hello World!"
+  ```
+
+### `watchdog`
+- **Do czego służy:** Monitorowanie systemu plików w czasie rzeczywistym. Wykrywa nowe pliki, zmiany w plikach lub usunięcie plików.
+- **Przykład:** Używamy go do wykrywania nowych raportów XML w folderze sieciowym.
+
+### `lxml`
+- **Do czego służy:** Bardzo szybkie i elastyczne parsowanie plików XML i HTML.
+- **Przykład:** Wyciąganie numerów `SNR`, `HWEL`, `BTLD` ze skomplikowanych plików raportów XML.
+
+### `pywin32`
+- **Do czego służy:** Dostęp do niskopoziomowego API systemu Windows (COM).
+- **Przykład:** Automatyczne wysyłanie e-maili przez aplikację **Outlook** zainstalowaną na komputerze.
+
+### `windows-toasts`
+- **Do czego służy:** Wyświetlanie natywnych powiadomień (toasts) w prawym dolnym rogu ekranu Windows 10/11.
+- **Przykład:** Powiadomienie "New Report Processed" po wykryciu pliku.
+
+---
+
+## 2. Narzędzia Deweloperskie (Dev Tools)
+Zainstalowane dodatkowo dla ułatwienia pracy w przyszłości.
+
+### `pyinstaller`
+- **Do czego służy:** Pakowanie skryptów `.py` do samodzielnych plików `.exe`, które działają na komputerach bez zainstalowanego Pythona.
+- **Użycie:** `pyinstaller --onefile moj_skrypt.py`
+
+### `black`
+- **Do czego służy:** Automatyczne formatowanie kodu. Dba o to, żeby kod był czytelny i zgodny ze standardami.
+- **Użycie:** `black .` (sformatuje wszystkie pliki w folderze).
+
+### `pytest`
+- **Do czego służy:** Framework do pisania i uruchamiania testów jednostkowych. Sprawdza, czy Twój kod działa poprawnie.
+
+### `requests`
+- **Do czego służy:** Najpopularniejsza biblioteka do wysyłania zapytań HTTP (pobieranie stron, korzystanie z API). Znacznie prostsza niż wbudowane `urllib`.
+- **Przykład:**
+  ```python
+  import requests
+  response = requests.get('https://api.github.com')
+  print(response.json())
+  ```
+
+### `pandas`
+- **Do czego służy:** Potężne narzędzie do analizy danych (tabel, Excela, CSV). Używane w Data Science.
+- **Przykład:** Wczytanie pliku CSV, przefiltrowanie danych i zapisanie do Excela w 3 linijkach kodu.
+

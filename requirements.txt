@@ -1,0 +1,6 @@
+flask==3.0.0
+flask-cors==4.0.0
+lxml==5.1.0
+watchdog==3.0.0
+pywin32==308
+windows-toasts==1.1.0

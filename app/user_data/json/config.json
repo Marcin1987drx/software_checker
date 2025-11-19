@@ -1,0 +1,10 @@
+{
+  "settingsFolder": "C:/New folder/soft_comp/Files",
+  "reportsFolder": "C:/New folder/soft_comp/MachineReports/Incoming",
+  "csvPath": "C:\\Users\\sm00312908\\OneDrive - DRAEXLMAIER\\Desktop\\soft\\app\\user_data",
+  "language": "en",
+  "theme": "dark",
+  "mailRecipients": [
+    "marcin.szymanski@draexlmaier.com"
+  ]
+}

@@ -1,0 +1,116 @@
+[
+  {
+    "timestamp": "2025-11-19 08:49:36",
+    "dmc": "2D5B8B58001D12531740017",
+    "snr": "N/A",
+    "finalResult": "ERROR",
+    "reportFile": "N/A",
+    "settingsFile": "N/A",
+    "results": [],
+    "errorMessage": "msgReportNotFound"
+  },
+  {
+    "timestamp": "2025-11-19 08:49:16",
+    "dmc": "2D5B8B58001D12531670239",
+    "snr": "N/A",
+    "finalResult": "ERROR",
+    "reportFile": "N/A",
+    "settingsFile": "N/A",
+    "results": [],
+    "errorMessage": "msgReportNotFound"
+  },
+  {
+    "timestamp": "2025-10-28 12:00:22",
+    "dmc": "2D5B7FE4501D12529510005_CCS1",
+    "snr": "5B7FE45",
+    "finalResult": "ERROR",
+    "reportFile": "C:\\New folder\\soft_comp\\MachineReports\\Incoming\\2D5B7FE4501D12529510005_CCS1\\2025-10-23_12-35-14\\2D5B7FE4501D12529510005_CCS1_EOL_2025-10-23_12-35-14.xml",
+    "settingsFile": "N/A",
+    "results": [],
+    "errorMessage": "Settings not found for SNR"
+  },
+  {
+    "timestamp": "2025-10-28 11:41:36",
+    "dmc": "2D5B7FE8201D12529430003_JP_TWIN",
+    "snr": "5B7FE82",
+    "finalResult": "NOK",
+    "reportFile": "C:\\New folder\\soft_comp\\MachineReports\\Incoming\\2D5B7FE8201D12529430003_JP_TWIN\\2025-10-23_13-25-56\\2D5B7FE8201D12529430003_JP_TWIN_EOL_2025-10-23_13-25-56.xml",
+    "settingsFile": "C:\\New folder\\soft_comp\\Files\\km_CIF-06_NA05-25-07-2025-545_20251023100001.xml",
+    "results": [
+      {
+        "Field": "HWEL",
+        "Report": "B0 8D 02 1E 14",
+        "Settings": "B0 8B 02 1E 14",
+        "Result": "NOK"
+      },
+      {
+        "Field": "BTLD",
+        "Report": "C1 5B 13 28 02",
+        "Settings": "C1 5B 13 28 01",
+        "Result": "NOK"
+      },
+      {
+        "Field": "SWFL",
+        "Report": "C1 5F 13 28 03",
+        "Settings": "C1 5F 13 28 03",
+        "Result": "OK"
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-10-28 11:19:57",
+    "dmc": "2D5B7FD3701D12524010002_CCS1",
+    "snr": "5B7FD37",
+    "finalResult": "NOK",
+    "reportFile": "C:\\New folder\\soft_comp\\MachineReports\\Incoming\\2D5B7FD3701D12524010002_CCS1\\2025-09-02_16-26-34\\2D5B7FD3701D12524010002_CCS1_EOL_2025-09-02_16-26-34.xml",
+    "settingsFile": "C:\\New folder\\soft_comp\\Files\\km_CIF-06_NA00-28-03-2025-210_20251023100000.xml",
+    "results": [
+      {
+        "Field": "HWEL",
+        "Report": "B0 8C 02 1E 14",
+        "Settings": "B0 8C 02 1E 14",
+        "Result": "OK"
+      },
+      {
+        "Field": "BTLD",
+        "Report": "C1 5B 13 28 02",
+        "Settings": "C1 5B 13 28 03",
+        "Result": "NOK"
+      },
+      {
+        "Field": "SWFL",
+        "Report": "C1 5F 13 28 03",
+        "Settings": "C1 5F 13 28 03",
+        "Result": "OK"
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-10-28 10:35:15",
+    "dmc": "2D5B7FD3701D12524010002_CCS1",
+    "snr": "5B7FD37",
+    "finalResult": "NOK",
+    "reportFile": "C:\\New folder\\soft_comp\\MachineReports\\Incoming\\2D5B7FD3701D12524010002_CCS1\\2025-09-02_16-26-34\\2D5B7FD3701D12524010002_CCS1_EOL_2025-09-02_16-26-34.xml",
+    "settingsFile": "C:\\New folder\\soft_comp\\Files\\km_CIF-06_NA00-28-03-2025-210_20251023100000.xml",
+    "results": [
+      {
+        "Field": "HWEL",
+        "Report": "B0 8C 02 1E 14",
+        "Settings": "B0 8C 02 1E 14",
+        "Result": "OK"
+      },
+      {
+        "Field": "BTLD",
+        "Report": "C1 5B 13 28 02",
+        "Settings": "C1 5B 13 28 03",
+        "Result": "NOK"
+      },
+      {
+        "Field": "SWFL",
+        "Report": "C1 5F 13 28 03",
+        "Settings": "C1 5F 13 28 03",
+        "Result": "OK"
+      }
+    ]
+  }
+]
