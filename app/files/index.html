@@ -303,6 +303,178 @@
     animation: fadeInDown 0.5s ease-out forwards;
 }
 
+/* PDI Check Comparison Cards */
+.pdi-comparison-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.pdi-comparison-card {
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.pdi-comparison-card.status-ok {
+    border-color: var(--status-ok);
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--status-ok-bg) 100%);
+}
+
+.pdi-comparison-card.status-nok {
+    border-color: var(--status-error);
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--status-error-bg) 100%);
+    animation: shake 0.5s ease-in-out;
+}
+
+.pdi-comparison-card.status-ok::before {
+    content: '✓';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 2em;
+    color: var(--status-ok);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.pdi-comparison-card.status-nok::before {
+    content: '✗';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 2em;
+    color: var(--status-error);
+    animation: blink 1s ease-in-out infinite;
+}
+
+.pdi-field-header {
+    font-size: 1.3em;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.pdi-comparison-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.pdi-data-block {
+    background: var(--bg-tertiary);
+    padding: 12px;
+    border-radius: var(--radius-sm);
+    border-left: 4px solid var(--border-color);
+}
+
+.pdi-data-block.excel-data {
+    border-left-color: #0097AC;
+}
+
+.pdi-data-block.settings-data {
+    border-left-color: #ffc107;
+}
+
+.pdi-data-label {
+    font-size: 0.85em;
+    color: var(--text-secondary);
+    margin-bottom: 5px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.pdi-data-value {
+    font-size: 1.1em;
+    font-family: 'Courier New', monospace;
+    color: var(--text-primary);
+    margin-bottom: 3px;
+}
+
+.pdi-match-indicator {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.75em;
+    font-weight: bold;
+    margin-left: 5px;
+}
+
+.pdi-match-indicator.ok {
+    background: var(--status-ok);
+    color: white;
+}
+
+.pdi-match-indicator.nok {
+    background: var(--status-error);
+    color: white;
+}
+
+.pdi-header-card {
+    background: var(--bg-tertiary);
+    padding: 15px 20px;
+    border-radius: var(--radius-md);
+    margin-bottom: 20px;
+    border-left: 5px solid var(--accent-color);
+}
+
+.pdi-header-card.status-ok {
+    border-left-color: var(--status-ok);
+}
+
+.pdi-header-card.status-nok {
+    border-left-color: var(--status-error);
+}
+
+.pdi-header-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.pdi-header-status {
+    font-size: 1.5em;
+    font-weight: bold;
+    padding: 5px 15px;
+    border-radius: var(--radius-sm);
+}
+
+.pdi-header-status.OK {
+    color: var(--status-ok);
+    background: var(--status-ok-bg);
+}
+
+.pdi-header-status.NOK {
+    color: var(--status-error);
+    background: var(--status-error-bg);
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.1); }
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
 
 
 
@@ -495,19 +667,7 @@
                     </div>
                     
                     <div id="pdi-check-results" style="display: none; margin-top: 20px;">
-                        <div class="result-table-container">
-                            <table>
-                                <thead><tr>
-                                    <th data-i18n="fieldHeader">Field</th>
-                                    <th data-i18n="excelHexHeader">Excel HEX</th>
-                                    <th data-i18n="excelDecHeader">Excel DEC</th>
-                                    <th data-i18n="settingsHexHeader">Settings HEX</th>
-                                    <th data-i18n="settingsDecHeader">Settings DEC</th>
-                                    <th data-i18n="resultHeader">Result</th>
-                                </tr></thead>
-                                <tbody id="pdi-check-table-body"></tbody>
-                            </table>
-                        </div>
+                        <div id="pdi-check-content"></div>
                     </div>
                     
                     <div style="margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 15px;">
@@ -1409,10 +1569,10 @@
         // --- PDI CHECK ---
         async function runPdiCheck() {
             const resultsDiv = document.getElementById('pdi-check-results');
-            const tableBody = document.getElementById('pdi-check-table-body');
+            const content = document.getElementById('pdi-check-content');
             
             resultsDiv.style.display = 'block';
-            tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Running PDI Check...</td></tr>';
+            content.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-secondary);"><div style="font-size: 2em; margin-bottom: 10px;">⏳</div>Running PDI Check...</div>';
             
             try {
                 const response = await fetch(`${API_URL}/api/pdi-check`, { method: 'POST' });
@@ -1422,7 +1582,7 @@
                 
                 if (!response.ok || result.success === false) {
                     const errorMsg = t(result.error) || result.error || 'Unknown error';
-                    tableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--status-error);">${errorMsg}</td></tr>`;
+                    content.innerHTML = `<div style="text-align: center; padding: 40px; color: var(--status-error);"><div style="font-size: 2em; margin-bottom: 10px;">❌</div>${errorMsg}</div>`;
                     return;
                 }
                 
@@ -1432,54 +1592,88 @@
                 await loadRecentPdiChecks(); // Refresh history
             } catch (error) {
                 console.error('PDI Check failed:', error);
-                tableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--status-error);">Request failed: ${error.message}</td></tr>`;
+                content.innerHTML = `<div style="text-align: center; padding: 40px; color: var(--status-error);"><div style="font-size: 2em; margin-bottom: 10px;">⚠️</div>Request failed: ${error.message}</div>`;
             }
         }
         
         function renderPdiResults(result) {
-            const tableBody = document.getElementById('pdi-check-table-body');
+            const container = document.getElementById('pdi-check-content');
             const snr = result.snr || 'N/A';
             const finalResult = result.finalResult || result.overall_status || 'N/A';
-            const settingsFile = result.settingsFile || '';
             const settingsDate = result.settingsDate || '';
             
-            tableBody.innerHTML = '';
+            container.innerHTML = '';
             
-            // Overall status row with settings info
-            const headerRow = document.createElement('tr');
-            const statusClass = finalResult === 'OK' ? 'OK' : 'NOK';
-            headerRow.innerHTML = `
-                <td colspan="7" style="background: var(--bg-secondary); font-weight: bold; padding: 12px;">
-                    SNR: ${snr} | Settings: ${settingsDate || settingsFile} | 
-                    <span class="${statusClass}" style="font-size: 1.1em;">${finalResult}</span>
-                </td>
+            // Header card with overall status
+            const headerCard = document.createElement('div');
+            headerCard.className = `pdi-header-card status-${finalResult.toLowerCase()}`;
+            headerCard.innerHTML = `
+                <div class="pdi-header-info">
+                    <div>
+                        <div style="font-size: 0.9em; color: var(--text-secondary); margin-bottom: 5px;">
+                            <strong>SNR:</strong> ${snr}
+                        </div>
+                        <div style="font-size: 0.85em; color: var(--text-secondary);">
+                            <strong>Settings Date:</strong> ${settingsDate || 'N/A'}
+                        </div>
+                    </div>
+                    <div class="pdi-header-status ${finalResult}">${finalResult}</div>
+                </div>
             `;
-            tableBody.appendChild(headerRow);
+            container.appendChild(headerCard);
             
-            // Component rows from results array
+            // Comparison cards container
+            const cardsContainer = document.createElement('div');
+            cardsContainer.className = 'pdi-comparison-container';
+            
+            // Create card for each component
             if (result.results && Array.isArray(result.results)) {
                 result.results.forEach(item => {
-                    const row = document.createElement('tr');
+                    const card = document.createElement('div');
+                    const itemStatus = item.Result || 'N/A';
+                    card.className = `pdi-comparison-card status-${itemStatus.toLowerCase()}`;
+                    
                     const hexMatch = item.HexMatch || 'N/A';
                     const decMatch = item.DecMatch || 'N/A';
-                    const overallStatus = item.Result || 'N/A';
                     
-                    // Color coding for each cell
-                    const hexClass = hexMatch === 'OK' ? 'OK' : (hexMatch === 'NOK' ? 'NOK' : '');
-                    const decClass = decMatch === 'OK' ? 'OK' : (decMatch === 'NOK' ? 'NOK' : '');
-                    const statusClass = overallStatus === 'OK' ? 'OK' : 'NOK';
-                    
-                    row.innerHTML = `
-                        <td style="font-weight: bold;">${item.Field}</td>
-                        <td>${item.ExcelHex || 'N/A'}</td>
-                        <td>${item.ExcelDec || 'N/A'}</td>
-                        <td class="${hexClass}">${item.SettingsHex || 'N/A'} ${hexMatch !== 'N/A' ? '<small>(' + hexMatch + ')</small>' : ''}</td>
-                        <td class="${decClass}">${item.SettingsDec || 'N/A'} ${decMatch !== 'N/A' ? '<small>(' + decMatch + ')</small>' : ''}</td>
-                        <td class="${statusClass}" style="font-weight: bold;">${overallStatus}</td>
+                    card.innerHTML = `
+                        <div class="pdi-field-header">
+                            <span style="background: var(--accent-color); color: white; padding: 5px 12px; border-radius: 6px; font-size: 0.9em;">
+                                ${item.Field}
+                            </span>
+                            <span style="flex: 1;"></span>
+                        </div>
+                        
+                        <div class="pdi-comparison-grid">
+                            <div class="pdi-data-block excel-data">
+                                <div class="pdi-data-label">📊 Excel PDI Data</div>
+                                <div class="pdi-data-value">
+                                    HEX: <strong>${item.ExcelHex || 'N/A'}</strong>
+                                </div>
+                                <div class="pdi-data-value">
+                                    DEC: <strong>${item.ExcelDec || 'N/A'}</strong>
+                                </div>
+                            </div>
+                            
+                            <div class="pdi-data-block settings-data">
+                                <div class="pdi-data-label">⚙️ Settings XML Data</div>
+                                <div class="pdi-data-value">
+                                    HEX: <strong>${item.SettingsHex || 'N/A'}</strong>
+                                    ${hexMatch !== 'N/A' ? `<span class="pdi-match-indicator ${hexMatch.toLowerCase()}">${hexMatch}</span>` : ''}
+                                </div>
+                                <div class="pdi-data-value">
+                                    DEC: <strong>${item.SettingsDec || 'N/A'}</strong>
+                                    ${decMatch !== 'N/A' ? `<span class="pdi-match-indicator ${decMatch.toLowerCase()}">${decMatch}</span>` : ''}
+                                </div>
+                            </div>
+                        </div>
                     `;
-                    tableBody.appendChild(row);
+                    
+                    cardsContainer.appendChild(card);
                 });
             }
+            
+            container.appendChild(cardsContainer);
         }
         
         async function loadRecentPdiChecks() {
