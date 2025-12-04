@@ -378,13 +378,12 @@
                 </div>
             </div>
             <div class="header-actions">
-                <button id="live-session-button" class="btn btn-secondary" data-view="dashboard-view" title="Live Watchdog Session">
+                <button id="pdi-check-button" class="btn btn-secondary" data-view="pdi-check-view" title="PDI Check">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M4 2h4v2H4V8H2V4c0-1.1.9-2 2-2zM20 2h-4v2h4v4h2V4c0-1.1-.9-2-2-2zM4 22h4v-2H4v-4H2v4c0 1.1.9 2 2 2zM20 22h-4v-2h4v-4h2v4c0 1.1-.9 2-2 2zM6 6h12v12H6V6z"/>
+        <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
     </svg>
-    <span data-i18n="liveSession">Live Session</span>
+    <span data-i18n="pdiCheck">PDI Check</span>
 </button>
-
                 
                 <button id="history-button" class="btn btn-secondary" data-view="history-view" title="Processing History"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 0 00-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 000-1.5h-3.75V6z" clip-rule="evenodd" /></svg><span data-i18n="dbViewer">DB Viewer</span></button>
                 
@@ -480,16 +479,39 @@
                     </div>
                 </div>
 
-                <div id="dashboard-view" style="display: none;">
-                    <h3 data-i18n="liveSession">Live Session Tracker (Watchdog)</h3>
+                <div id="pdi-check-view" style="display: none;">
+                    <h3 data-i18n="pdiCheckTitle">PDI Check - Excel Validation</h3>
                     <div class="result-detail-card">
-                         <h4 data-i18n="recentWatchdogEvents">Recent Watchdog Events (from results.csv):</h4>
-                         <div id="live-session-history" style="margin-top: 15px;">
-                             <p style="color: var(--text-secondary); text-align: center;">Loading recent events...</p>
-                         </div>
-                         <div style="font-size: 0.9em; color: var(--text-secondary); margin-top: 15px; border-top: 1px dashed var(--border-color); padding-top: 10px;">
-                             <span data-i18n="liveNote">This view shows the latest files processed by the Watchdog in this session (from results.csv).</span>
-                         </div>
+                        <p data-i18n="pdiCheckDescription">Verify Excel PDI data against Settings files. The system will read values from the configured Excel file and compare them with Settings XML.</p>
+                        <button id="run-pdi-check-button" class="btn btn-primary" style="width: 100%; margin-top: 15px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                            </svg>
+                            <span data-i18n="runPdiCheck">RUN PDI CHECK</span>
+                        </button>
+                    </div>
+                    
+                    <div id="pdi-check-results" style="display: none; margin-top: 20px;">
+                        <div class="result-table-container">
+                            <table>
+                                <thead><tr>
+                                    <th data-i18n="fieldHeader">Field</th>
+                                    <th data-i18n="excelHexHeader">Excel HEX</th>
+                                    <th data-i18n="excelDecHeader">Excel DEC</th>
+                                    <th data-i18n="settingsHexHeader">Settings HEX</th>
+                                    <th data-i18n="settingsDecHeader">Settings DEC</th>
+                                    <th data-i18n="resultHeader">Result</th>
+                                </tr></thead>
+                                <tbody id="pdi-check-table-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 15px;">
+                        <h4 style="margin-bottom: 10px;" data-i18n="recentPdiChecks">Recent PDI Checks:</h4>
+                        <div id="recent-pdi-checks">
+                            <p style="color: var(--text-secondary); font-size: 0.9em; text-align: center;" data-i18n="noPdiChecks">No recent PDI checks.</p>
+                        </div>
                     </div>
                 </div>
                 
@@ -551,17 +573,24 @@
                     <div id="settings-status-message" class="status-message-panel">Loading settings...</div>
                     
                     <div class="input-group" style="margin-bottom: 15px;">
-                        <label for="reports-path" data-i18n="reportsFolderLabel">1. Reports Folder (Watchdog / Network Path)</label>
+                        <label for="settings-path" data-i18n="settingsFolderLabel">1. Settings Folder (Settings Files)</label>
+                        <div class="input-group" style="flex-direction: row; gap: 10px;">
+                            <input type="text" id="settings-path" class="input-field" placeholder="Path to settings files" readonly>
+                            <button id="browse-settings" class="btn btn-secondary" style="width: 120px;" data-i18n="browseButton">Browse...</button>
+                        </div>
+                    </div>
+                    <div class="input-group" style="margin-bottom: 15px;">
+                        <label for="reports-path" data-i18n="reportsFolderLabel">2. Reports Folder (Manual Check)</label>
                         <div class="input-group" style="flex-direction: row; gap: 10px;">
                             <input type="text" id="reports-path" class="input-field" placeholder="Path to reports folder" readonly>
                             <button id="browse-reports" class="btn btn-secondary" style="width: 120px;" data-i18n="browseButton">Browse...</button>
                         </div>
                     </div>
                     <div class="input-group" style="margin-bottom: 15px;">
-                        <label for="settings-path" data-i18n="settingsFolderLabel">2. Settings Folder (Settings Files)</label>
+                        <label for="excel-path" data-i18n="excelFileLabel">3. Excel File Path (PDI Check)</label>
                         <div class="input-group" style="flex-direction: row; gap: 10px;">
-                            <input type="text" id="settings-path" class="input-field" placeholder="Path to settings files" readonly>
-                            <button id="browse-settings" class="btn btn-secondary" style="width: 120px;" data-i18n="browseButton">Browse...</button>
+                            <input type="text" id="excel-path" class="input-field" placeholder="Path to Excel file" readonly>
+                            <button id="browse-excel" class="btn btn-secondary" style="width: 120px;" data-i18n="browseButton">Browse...</button>
                         </div>
                     </div>
                     <div class="input-group" style="margin-bottom: 15px;">
@@ -619,7 +648,7 @@
             pl: {
                 dmcLabel: "Wprowadź lub zeskanuj kod DMC:", runCheck: "SPRAWDŹ OPROGRAMOWANIE", resultsWillAppear: "Szczegółowe wyniki pojawią się obok.",
                 liveSession: "Sesja Na Żywo", dbViewer: "Przeglądarka Bazy", analysis: "Analiza",
-                connected: "Połączono", notConnected: "Rozłączono", setupRequired: "Wymagana Konfiguracja",
+                connected: "Gotowe", notConnected: "Rozłączono", setupRequired: "Skonfiguruj ścieżki",
                 networkError: "Błąd Sieci",
                 lastResult: "Ostatni wynik:", time: "Czas:", historyTitle: "Historia Przetwarzania (DB Viewer)",
                 statsTitle: "Status Sesji Watchdoga", okTotal: "OK Łącznie:", nokTotal: "NOK Łącznie:",
@@ -673,12 +702,28 @@
                 criticalSettingsTitle: "Krytyczne Ustawienia i Konfiguracja",
                 addRecipientButton: "+ Dodaj Odbiorcę",
                 dmcLabelShort: "DMC:",
-                snrLabelShort: "SNR:"
+                snrLabelShort: "SNR:",
+                pdiCheck: "PDI Check",
+                pdiCheckTitle: "PDI Check - Walidacja Excel",
+                pdiCheckDescription: "Sprawdź dane PDI z Excel względem plików Settings. System odczyta wartości z skonfigurowanego pliku Excel i porówna je z Settings XML.",
+                runPdiCheck: "URUCHOM PDI CHECK",
+                reportsFolderLabel: "2. Folder Raportów (Manual Check)",
+                excelFileLabel: "3. Ścieżka do pliku Excel (PDI Check)",
+                excelHexHeader: "Excel HEX",
+                excelDecHeader: "Excel DEC",
+                settingsHexHeader: "Settings HEX",
+                settingsDecHeader: "Settings DEC",
+                recentPdiChecks: "Ostatnie PDI Checki:",
+                noPdiChecks: "Brak ostatnich PDI checków.",
+                msgExcelNotFound: "Błąd: Plik Excel nie został znaleziony!",
+                msgExcelPathNotSet: "Błąd: Ścieżka do pliku Excel nie jest ustawiona w Ustawieniach!",
+                msgSnrNotFoundInExcel: "Błąd: SNR nie został znaleziony w pliku Excel (komórka M5)!",
+                msgOpenpyxlNotInstalled: "Błąd: Biblioteka openpyxl nie jest zainstalowana!"
             },
             en: {
                 dmcLabel: "Enter or scan DMC code:", runCheck: "CHECK SOFTWARE", resultsWillAppear: "Detailed results will appear next to you.",
                 liveSession: "Live Session", dbViewer: "DB Viewer", analysis: "Analysis",
-                connected: "Connected", notConnected: "Not Connected", setupRequired: "Setup Required",
+                connected: "Ready", notConnected: "Not Connected", setupRequired: "Setup Required",
                 networkError: "Network Error",
                 lastResult: "Last Result:", time: "Time:", historyTitle: "Processing History (DB Viewer)",
                 statsTitle: "Watchdog Session Status", okTotal: "OK Total:", nokTotal: "NOK Total:",
@@ -732,12 +777,28 @@
                 criticalSettingsTitle: "Critical Settings and Configuration",
                 addRecipientButton: "+ Add Recipient",
                 dmcLabelShort: "DMC:",
-                snrLabelShort: "SNR:"
+                snrLabelShort: "SNR:",
+                pdiCheck: "PDI Check",
+                pdiCheckTitle: "PDI Check - Excel Validation",
+                pdiCheckDescription: "Verify Excel PDI data against Settings files. The system will read values from the configured Excel file and compare them with Settings XML.",
+                runPdiCheck: "RUN PDI CHECK",
+                reportsFolderLabel: "2. Reports Folder (Manual Check)",
+                excelFileLabel: "3. Excel File Path (PDI Check)",
+                excelHexHeader: "Excel HEX",
+                excelDecHeader: "Excel DEC",
+                settingsHexHeader: "Settings HEX",
+                settingsDecHeader: "Settings DEC",
+                recentPdiChecks: "Recent PDI Checks:",
+                noPdiChecks: "No recent PDI checks.",
+                msgExcelNotFound: "Error: Excel file not found!",
+                msgExcelPathNotSet: "Error: Excel file path is not set in Settings!",
+                msgSnrNotFoundInExcel: "Error: SNR not found in Excel file (cell M5)!",
+                msgOpenpyxlNotInstalled: "Error: openpyxl library is not installed!"
             },
             de: {
                  dmcLabel: "DMC-Code eingeben oder scannen:", runCheck: "SOFTWARE PRÜFEN", resultsWillAppear: "Detaillierte Ergebnisse werden daneben angezeigt.",
                  liveSession: "Live Session", dbViewer: "DB Viewer", analysis: "Analyse",
-                 connected: "Verbunden", notConnected: "Nicht verbunden", setupRequired: "Setup erforderlich",
+                 connected: "Bereit", notConnected: "Nicht verbunden", setupRequired: "Einrichtung erforderlich",
                  networkError: "Netzwerkfehler",
                  lastResult: "Letztes Ergebnis:", time: "Zeit:", historyTitle: "Verarbeitungshistorie (DB Viewer)",
                  statsTitle: "Watchdog Session Status", okTotal: "OK Gesamt:", nokTotal: "NOK Gesamt:",
@@ -791,12 +852,28 @@
                  criticalSettingsTitle: "Kritische Einstellungen und Konfiguration",
                  addRecipientButton: "+ Empfänger hinzufügen",
                  dmcLabelShort: "DMC:",
-                 snrLabelShort: "SNR:"
+                 snrLabelShort: "SNR:",
+                 pdiCheck: "PDI Check",
+                 pdiCheckTitle: "PDI Check - Excel-Validierung",
+                 pdiCheckDescription: "Excel-PDI-Daten mit Settings-Dateien überprüfen. Das System liest Werte aus der konfigurierten Excel-Datei und vergleicht sie mit Settings-XML.",
+                 runPdiCheck: "PDI CHECK AUSFÜHREN",
+                 reportsFolderLabel: "2. Berichtsordner (Manual Check)",
+                 excelFileLabel: "3. Excel-Dateipfad (PDI Check)",
+                 excelHexHeader: "Excel HEX",
+                 excelDecHeader: "Excel DEC",
+                 settingsHexHeader: "Settings HEX",
+                 settingsDecHeader: "Settings DEC",
+                 recentPdiChecks: "Letzte PDI-Checks:",
+                 noPdiChecks: "Keine aktuellen PDI-Checks.",
+                 msgExcelNotFound: "Fehler: Excel-Datei nicht gefunden!",
+                 msgExcelPathNotSet: "Fehler: Excel-Dateipfad ist in den Einstellungen nicht festgelegt!",
+                 msgSnrNotFoundInExcel: "Fehler: SNR in der Excel-Datei nicht gefunden (Zelle M5)!",
+                 msgOpenpyxlNotInstalled: "Fehler: openpyxl-Bibliothek ist nicht installiert!"
              },
              ro: {
                  dmcLabel: "Introduceți sau scanați codul DMC:", runCheck: "VERIFICARE SOFTWARE", resultsWillAppear: "Rezultatele detaliate vor apărea lângă dvs.",
                  liveSession: "Live Session", dbViewer: "Vizualizare DB", analysis: "Analiză",
-                 connected: "Conectat", notConnected: "Nu e conectat", setupRequired: "Configurare necesară",
+                 connected: "Gata", notConnected: "Neconectat", setupRequired: "Configurare Necesară",
                  networkError: "Eroare de rețea",
                  lastResult: "Ultimul rezultat:", time: "Ora:", historyTitle: "Istoric Procesare (Vizualizare DB)",
                  statsTitle: "Watchdog Session Status", okTotal: "Total OK:", nokTotal: "Total NOK:",
@@ -850,7 +927,23 @@
                  criticalSettingsTitle: "Setări Critice și Configurare",
                  addRecipientButton: "+ Adaugă Destinatar",
                  dmcLabelShort: "DMC:",
-                 snrLabelShort: "SNR:"
+                 snrLabelShort: "SNR:",
+                 pdiCheck: "PDI Check",
+                 pdiCheckTitle: "PDI Check - Validare Excel",
+                 pdiCheckDescription: "Verificați datele PDI Excel față de fișierele Settings. Sistemul va citi valori din fișierul Excel configurat și le va compara cu Settings XML.",
+                 runPdiCheck: "RULEAZĂ PDI CHECK",
+                 reportsFolderLabel: "2. Dosar Rapoarte (Manual Check)",
+                 excelFileLabel: "3. Cale Fișier Excel (PDI Check)",
+                 excelHexHeader: "Excel HEX",
+                 excelDecHeader: "Excel DEC",
+                 settingsHexHeader: "Settings HEX",
+                 settingsDecHeader: "Settings DEC",
+                 recentPdiChecks: "PDI Check-uri Recente:",
+                 noPdiChecks: "Nu există PDI check-uri recente.",
+                 msgExcelNotFound: "Eroare: Fișierul Excel nu a fost găsit!",
+                 msgExcelPathNotSet: "Eroare: Calea fișierului Excel nu este setată în Setări!",
+                 msgSnrNotFoundInExcel: "Eroare: SNR nu a fost găsit în fișierul Excel (celula M5)!",
+                 msgOpenpyxlNotInstalled: "Eroare: Biblioteca openpyxl nu este instalată!"
              }
         };
         
@@ -862,20 +955,18 @@
 
         // --- GLOBAL STATE & DOM MAPPING ---
         const $ = (id) => document.getElementById(id);
-        const dmcInput = $('dmc-input'), checkButton = $('check-button'), settingsButton = $('settings-button'), historyButton = $('history-button'), analysisButton = $('analysis-button'), liveSessionButton = $('live-session-button'), themeToggle = $('theme-toggle'), languageToggle = $('language-toggle'), statusMessage = $('status-message');
-        const settingsPathInput = $('settings-path'), reportsPathInput = $('reports-path'), csvPathInput = $('csv-path'), browseSettingsBtn = $('browse-settings'), browseReportsBtn = $('browse-reports'), browseCsvBtn = $('browse-csv'), saveSettingsBtn = $('save-settings'), cancelSettingsBtn = $('cancel-settings'), mailRecipientsList = $('mail-recipients-list'), addRecipientBtn = $('add-recipient-button'), archiveToggle = $('archive-toggle'), clearEmailBtn = $('clear-email-button'), resetAllBtn = $('reset-all-button');
-        const resultsView = $('results-view'), settingsView = $('settings-view'), historyView = $('history-view'), dashboardView = $('dashboard-view'), analysisView = $('analysis-view');
+        const dmcInput = $('dmc-input'), checkButton = $('check-button'), settingsButton = $('settings-button'), historyButton = $('history-button'), analysisButton = $('analysis-button'), pdiCheckButton = $('pdi-check-button'), themeToggle = $('theme-toggle'), languageToggle = $('language-toggle'), statusMessage = $('status-message');
+        const settingsPathInput = $('settings-path'), reportsPathInput = $('reports-path'), excelPathInput = $('excel-path'), csvPathInput = $('csv-path'), browseSettingsBtn = $('browse-settings'), browseReportsBtn = $('browse-reports'), browseExcelBtn = $('browse-excel'), browseCsvBtn = $('browse-csv'), saveSettingsBtn = $('save-settings'), cancelSettingsBtn = $('cancel-settings'), mailRecipientsList = $('mail-recipients-list'), addRecipientBtn = $('add-recipient-button'), archiveToggle = $('archive-toggle'), clearEmailBtn = $('clear-email-button'), resetAllBtn = $('reset-all-button');
+        const resultsView = $('results-view'), settingsView = $('settings-view'), historyView = $('history-view'), pdiCheckView = $('pdi-check-view'), analysisView = $('analysis-view');
         const resultsTableBody = $('results-table-body'), resultDmc = $('result-dmc'), resultSnr = $('result-snr'), resultSettingsFile = $('result-settings-file'), resultSettingsDate = $('result-settings-date'), finalResult = $('final-result'), saveReportJpgBtn = $('save-report-jpg'), generateSmacJsonBtn = $('generate-smac-json');
         const historyTableBody = $('history-table-body'), historyDateFrom = $('history-date-from'), historyDateTo = $('history-date-to'), historyApplyFilterBtn = $('history-apply-filter'), historyClearFilterBtn = $('history-clear-filter'), historyRefreshBtn = $('history-refresh'), exportHistoryCsvBtn = $('export-history-csv');
         
-        // POPRAWKA: ZMIENIONO NAZWY CANVAS DLA WIDOKU ANALYSIS
         const nokPieChartAnalysis = $('nok-pie-chart-analysis'), nokBarChartAnalysis = $('nok-bar-chart-analysis');
         
-        const liveSessionHistory = $('live-session-history');
         const statusDot = $('status-dot'), statusText = $('status-text');
         const hwelIdInput = $('hwel-id-input'), btldIdInput = $('btld-id-input'), swflIdInput = $('swfl-id-input');
         const resultsMetadata = $('results-metadata'), emptyResultsPlaceholder = $('empty-results-placeholder'), resultsTableWrapper = $('results-table-wrapper');
-        const recentScansList = $('recent-scans-list'); // Nowy element dla ostatnich ręcznych skanów
+        const recentScansList = $('recent-scans-list');
 
         // Global State (jak w v2.4.1)
         const DEFAULT_CONFIG = {
@@ -888,8 +979,8 @@
         let pieChartAnalysisInstance = null; let barChartAnalysisInstance = null; // Instancje dla Analysis
         let currentResultData = null; 
         
-        let liveSessionInterval = null; // Zmienna do przechowywania interwału Live Session
-        let liveSessionDisplayedSet = new Set(); // POPRAWKA: Śledzenie wyświetlonych elementów
+        // --- PDI CHECK LOGIC ---
+        let recentPdiChecks = [];
 
         // --- MANUAL SCANS LOGIC (Pobieranie z Server.py) ---
         let recentManualScans = [];
@@ -1017,33 +1108,17 @@
         }
 
         // --- UI UTILS (Nowy Styl) ---
-        function stopLiveSessionPolling() {
-            if (liveSessionInterval) {
-                clearInterval(liveSessionInterval);
-                liveSessionInterval = null;
-            }
-        }
-        
         function showCentralView(viewElement) {
-            // Zatrzymaj polling Live Session, gdy widok jest zmieniany
-            stopLiveSessionPolling();
             clearStatus();
             
-            [resultsView, settingsView, historyView, dashboardView, analysisView].forEach(view => {
+            [resultsView, settingsView, historyView, pdiCheckView, analysisView].forEach(view => {
                 if(view) view.style.display = 'none';
             });
             viewElement.style.display = 'block';
             
-            // POPRAWKA: Dodanie automatycznego ładowania bazy danych i włączenie Live Session
-            if (viewElement === historyView) loadHistory(); // 2. Baza Danych (automatyczne ładowanie)
-            if (viewElement === dashboardView) { 
-                // Reset Setu przy wchodzeniu (opcjonalne, ale bezpieczniejsze)
-                liveSessionHistory.innerHTML = `<p style="color: var(--text-secondary); text-align: center;">${t('loadingMsg')}</p>`;
-                liveSessionDisplayedSet.clear(); 
-                fetchLiveSessionEvents(); // 1. Live Session (natychmiastowe ładowanie)
-                liveSessionInterval = setInterval(fetchLiveSessionEvents, POLLING_INTERVAL_MS); // 1. Live Session (Polling co 3s)
-            } 
-            if (viewElement === analysisView) fetchStatsAndRenderAnalysis(); // Analiza (wykresy)
+            if (viewElement === historyView) loadHistory();
+            if (viewElement === pdiCheckView) loadRecentPdiChecks();
+            if (viewElement === analysisView) fetchStatsAndRenderAnalysis();
             if (viewElement === settingsView) checkWatchdogStatus();
         }
 
@@ -1064,23 +1139,17 @@
                 if (!response.ok) throw new Error('Server not responding');
                 const status = await response.json();
 
-                statusDot.className = 'status-dot nok';
-                statusText.textContent = t('notConnected');
-                settingsButton.classList.remove('pulse-required');
-                
-                if (status.status === 'READY' && status.is_available) {
+                if (status.status === 'READY') {
                     statusDot.className = 'status-dot ok';
                     statusText.textContent = t('connected');
+                    settingsButton.classList.remove('pulse-required');
                 } else if (status.status === 'SETUP_REQUIRED') {
                     statusDot.className = 'status-dot nok';
                     statusText.textContent = t('setupRequired');
                     settingsButton.classList.add('pulse-required'); 
-                } else if (status.status === 'DISCONNECTED') {
+                } else {
                     statusDot.className = 'status-dot nok';
                     statusText.textContent = t('notConnected');
-                } else if (status.status === 'NETWORK_ERROR') {
-                    statusDot.className = 'status-dot nok';
-                    statusText.textContent = t('networkError');
                 }
 
             } catch (error) {
@@ -1099,14 +1168,14 @@
                 config = { ...DEFAULT_CONFIG, ...loadedConfig };
                 
                 settingsPathInput.value = config.settingsFolder; 
-                reportsPathInput.value = config.reportsFolder; 
+                reportsPathInput.value = config.reportsFolder || ''; 
+                excelPathInput.value = config.excelFilePath || ''; 
                 csvPathInput.value = config.csvPath; 
                 archiveToggle.checked = config.archiveFiles;
                 renderEmailRecipients(config.mailRecipients);
                 
                 setTheme(config.theme); 
                 languageToggle.value = config.language;
-                // Poprawka: Wymuszenie załadowania tłumaczeń przy starcie
                 setLanguage(config.language); 
                 
             } catch (error) { 
@@ -1138,6 +1207,7 @@
             
             config.settingsFolder = settingsPathInput.value; 
             config.reportsFolder = reportsPathInput.value; 
+            config.excelFilePath = excelPathInput.value; 
             config.csvPath = csvPathInput.value; 
             config.archiveFiles = archiveToggle.checked; 
             config.mailRecipients = newRecipients; 
@@ -1157,7 +1227,11 @@
         }
 
         async function onCancelSettings() {
-            settingsPathInput.value = config.settingsFolder; reportsPathInput.value = config.reportsFolder; csvPathInput.value = config.csvPath; archiveToggle.checked = config.archiveFiles; 
+            settingsPathInput.value = config.settingsFolder; 
+            reportsPathInput.value = config.reportsFolder || ''; 
+            excelPathInput.value = config.excelFilePath || ''; 
+            csvPathInput.value = config.csvPath; 
+            archiveToggle.checked = config.archiveFiles; 
             renderEmailRecipients(config.mailRecipients); 
             showCentralView(resultsView);
             clearStatus();
@@ -1199,6 +1273,20 @@
             } 
         }
 
+        async function handleBrowseFile(inputElement) { 
+            try { 
+                const response = await fetch(`${API_URL}/api/browse-file`); 
+                const result = await response.json(); 
+                if (result.success && result.path) { 
+                    inputElement.value = result.path; 
+                } else if (result.error !== "Cancelled") { 
+                    alert(`${t('browseButton')} error: ${result.error}`); 
+                } 
+            } catch (error) { 
+                alert(`Server error during file selection: ${error.message}`); 
+            } 
+        }
+
         function renderEmailRecipients(recipients = []) { 
             mailRecipientsList.innerHTML = ''; 
             if (recipients.length === 0) { addEmailRecipient(""); } else { recipients.forEach(addEmailRecipient); } 
@@ -1219,6 +1307,7 @@
             clearStatus(); currentResultData = null; 
             
             const dmc = dmcInput.value.trim();
+            
             if (!dmc) { showStatus('msgDmcEmpty', 'error'); return; }
             if (!config.settingsFolder || !config.reportsFolder) { showStatus('msgPathsNotSet', 'error'); return; }
             
@@ -1314,93 +1403,101 @@
         }
 
 
-        // --- DASHBOARD (LIVE SESSION) ---
-        async function fetchLiveSessionEvents() {
+        // --- PDI CHECK ---
+        async function runPdiCheck() {
+            const resultsDiv = document.getElementById('pdi-check-results');
+            const tableBody = document.getElementById('pdi-check-table-body');
+            
+            resultsDiv.style.display = 'block';
+            tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Running PDI Check...</td></tr>';
+            
             try {
-                const responseHistory = await fetch(`${API_URL}/api/get-history`);
-                const fullHistory = responseHistory.ok ? await responseHistory.json() : [];
+                const response = await fetch(`${API_URL}/api/pdi-check`, { method: 'POST' });
+                const result = await response.json();
                 
-                // Pobierz 20 najnowszych (żeby mieć pewność, że nic nie uciekło)
-                const recentEvents = fullHistory.reverse().slice(0, 20); 
-                
-                if (recentEvents.length === 0) {
-                     if (liveSessionHistory.innerHTML.includes('Loading')) {
-                        liveSessionHistory.innerHTML = `<p style="color: var(--text-secondary); text-align: center;">No Watchdog events recorded yet (results.csv is empty).</p>`;
-                     }
-                     return;
+                if (!response.ok) {
+                    tableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--status-error);">${result.error || 'Error'}</td></tr>`;
+                    return;
                 }
                 
-                // Jeśli to pierwsze ładowanie (lub po wyczyszczeniu), wyczyść "Loading..."
-                if (liveSessionHistory.innerHTML.includes('Loading')) {
-                    liveSessionHistory.innerHTML = '';
-                }
-
-                // Odwracamy kolejność, żeby najnowsze były na dole listy przy iteracji, ale my używamy prepend, więc:
-                // Chcemy dodać TYLKO NOWE elementy na górę (prepend).
-                // recentEvents[0] to NAJNOWSZY.
-                
-                // Iterujemy od NAJSTARSZEGO z pobranych do NAJNOWSZEGO, sprawdzając czy już są.
-                // Ale chwila, prepend wstawia na początek. Więc jeśli mamy [New1, New2], to wstawiamy New2, potem New1? Nie.
-                // Jeśli wstawiamy prepend, to musimy wstawiać od najstarszego z nowych do najnowszego z nowych?
-                // Nie, najnowszy ma być na samej górze.
-                
-                // Przykład: Mamy [B, A]. Pobieramy [C, B, A]. C jest nowy.
-                // Wstawiamy C na górę.
-                
-                // Znajdź nowe elementy
-                const newItems = [];
-                recentEvents.forEach(row => {
-                    const uniqueId = (row.timestamp || '') + '_' + (row.dmc || '');
-                    if (!liveSessionDisplayedSet.has(uniqueId)) {
-                        newItems.push({ row, uniqueId });
-                        liveSessionDisplayedSet.add(uniqueId);
-                    }
-                });
-                
-                // Jeśli nie ma nowych, koniec
-                if (newItems.length === 0) return;
-
-                // Sortujemy nowe tak, żeby najnowsze były dodawane jako ostatnie do newItems (żeby zachować kolejność przy prepend? Nie).
-                // recentEvents jest od najnowszego [0].
-                // newItems ma [Najnowszy, Starszy...] (bo iterowaliśmy po recentEvents).
-                // Jeśli zrobimy prepend dla Najnowszego, będzie na górze. Potem dla Starszego - będzie nad Najnowszym. ŹLE.
-                // Musimy wstawiać od "najstarszego z nowych" do "najnowszego z nowych".
-                
-                newItems.reverse().forEach(({ row, uniqueId }) => {
-                    const status = (row.final || 'ERROR').toUpperCase();
-                    const resultTextClass = status === 'OK' ? 'OK' : (status === 'NOK' ? 'NOK' : 'ERROR');
-                    const dmcName = row.dmc || 'N/A';
-                    const time = (row.timestamp || '').split(' ')[1] || '';
-                    
-                    const div = document.createElement('div');
-                    div.className = 'live-session-item';
-                    
-                    // Animacja tylko dla nowych
-                    div.classList.add('new-entry'); 
-                    
-                    div.innerHTML = `
-                        <div>${time} | <strong>${dmcName}</strong></div> 
-                        <div class="live-session-result ${resultTextClass}">${status}</div>
-                    `;
-                    
-                    // Wstawiamy na początek listy
-                    liveSessionHistory.prepend(div);
-                });
-                
-                // Ogranicz liczbę elementów w DOM do 50
-                while (liveSessionHistory.children.length > 50) {
-                    const lastChild = liveSessionHistory.lastElementChild;
-                    // Musimy usunąć też z Setu? Trudno zidentyfikować ID z DOM bez dataset.
-                    // Ale Set służy tylko do sprawdzania "czy dodać". Jak usuniemy z DOM, to przy następnym fetchu (jeśli nadal jest w ostatnich 20) by dodało znowu.
-                    // Więc NIE usuwamy z Setu tych co są w recentEvents.
-                    // Możemy czyścić Set okresowo, ale przy 50 elementach to nie problem.
-                    liveSessionHistory.removeChild(lastChild);
-                }
-
-
-            } catch (error) { 
-                console.error("Failed to load live session data:", error); 
+                renderPdiResults(result);
+                await loadRecentPdiChecks(); // Refresh history
+            } catch (error) {
+                console.error('PDI Check failed:', error);
+                tableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--status-error);">Request failed: ${error.message}</td></tr>`;
             }
+        }
+        
+        function renderPdiResults(result) {
+            const tableBody = document.getElementById('pdi-check-table-body');
+            const snr = result.snr || 'N/A';
+            const timestamp = result.timestamp || '';
+            
+            tableBody.innerHTML = '';
+            
+            // Overall status row
+            const headerRow = document.createElement('tr');
+            headerRow.innerHTML = `
+                <td colspan="6" style="background: var(--bg-secondary); font-weight: bold;">
+                    SNR: ${snr} | Time: ${timestamp} | Status: 
+                    <span class="${result.overall_status === 'OK' ? 'OK' : 'NOK'}">${result.overall_status}</span>
+                </td>
+            `;
+            tableBody.appendChild(headerRow);
+            
+            // Component rows
+            ['hwel', 'btld', 'swfl'].forEach(comp => {
+                const data = result.components[comp];
+                if (!data) return;
+                
+                const row = document.createElement('tr');
+                const statusClass = data.status === 'OK' ? 'OK' : 'NOK';
+                
+                row.innerHTML = `
+                    <td>${comp.toUpperCase()}</td>
+                    <td>${data.excel_hex || 'N/A'}</td>
+                    <td>${data.excel_dec || 'N/A'}</td>
+                    <td>${data.settings_hex || 'N/A'}</td>
+                    <td>${data.settings_dec || 'N/A'}</td>
+                    <td class="${statusClass}">${data.status}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+        
+        async function loadRecentPdiChecks() {
+            try {
+                const response = await fetch(`${API_URL}/api/get-pdi-checks`);
+                if (!response.ok) return;
+                
+                recentPdiChecks = await response.json();
+                renderRecentPdiChecks();
+            } catch (error) {
+                console.error('Failed to load PDI checks:', error);
+            }
+        }
+        
+        function renderRecentPdiChecks() {
+            const container = document.getElementById('recent-pdi-checks');
+            if (!container) return;
+            
+            if (recentPdiChecks.length === 0) {
+                container.innerHTML = `<p style="color: var(--text-secondary); text-align: center;">No PDI checks recorded yet.</p>`;
+                return;
+            }
+            
+            container.innerHTML = '';
+            recentPdiChecks.slice(0, 10).forEach(check => {
+                const div = document.createElement('div');
+                div.className = 'live-session-item';
+                const statusClass = check.overall_status === 'OK' ? 'OK' : 'NOK';
+                
+                div.innerHTML = `
+                    <div>${check.timestamp || 'N/A'} | <strong>SNR: ${check.snr || 'N/A'}</strong></div>
+                    <div class="live-session-result ${statusClass}">${check.overall_status}</div>
+                `;
+                container.appendChild(div);
+            });
         }
 
 
@@ -1619,15 +1716,16 @@
             dmcInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') checkButton.click(); });
             checkButton.addEventListener('click', onCheckButtonPress);
             
-            // Reorganizacja przycisków w headerze
             settingsButton.addEventListener('click', () => showCentralView(settingsView));
             historyButton.addEventListener('click', () => showCentralView(historyView));
-            analysisButton.addEventListener('click', () => showCentralView(analysisView)); // Analiza (wykresy)
-            liveSessionButton.addEventListener('click', () => showCentralView(dashboardView)); // Live Session (Watchdog)
+            analysisButton.addEventListener('click', () => showCentralView(analysisView));
+            pdiCheckButton.addEventListener('click', () => showCentralView(pdiCheckView));
             
-            // ... (pozostałe listenery) ...
+            $('run-pdi-check-button').addEventListener('click', runPdiCheck);
+            
             browseSettingsBtn.addEventListener('click', () => handleBrowse(settingsPathInput));
             browseReportsBtn.addEventListener('click', () => handleBrowse(reportsPathInput));
+            browseExcelBtn.addEventListener('click', () => handleBrowseFile(excelPathInput));
             browseCsvBtn.addEventListener('click', () => handleBrowse(csvPathInput));
             cancelSettingsBtn.addEventListener('click', onCancelSettings);
             saveSettingsBtn.addEventListener('click', onSaveSettings);
@@ -1657,10 +1755,10 @@
         // --- START ---
         document.addEventListener('DOMContentLoaded', async () => {
             await loadConfig(); 
-            loadRecentScans(); // Wczytaj historię ręcznych skanów
+            loadRecentScans();
             setupListeners();
             startStatusPolling();
-            showCentralView(dashboardView); 
+            showCentralView(resultsView); 
         });
 
         // POZOSTAŁE FUNKCJE WERSJI 2.4.1 (dla kompatybilności)

@@ -11,6 +11,21 @@ if errorlevel 1 (
     pip install pyinstaller
 )
 
+:: Convert logo to icon if logo.png exists
+if exist "logo.png" (
+    echo.
+    echo Converting logo.png to icon.ico...
+    python -c "from PIL import Image" 2>nul
+    if errorlevel 1 (
+        echo Pillow not found. Installing...
+        pip install pillow
+    )
+    python convert_logo_to_icon.py
+) else (
+    echo.
+    echo Warning: logo.png not found. Building without custom icon.
+)
+
 :: Upewnij się, że folder user_data istnieje dla trybu skryptu
 if not exist "app\user_data" mkdir "app\user_data"
 
