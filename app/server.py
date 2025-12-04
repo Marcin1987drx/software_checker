@@ -698,46 +698,52 @@ def process_pdi_check(excel_file_path, settings_folder_str):
 
         logging.info(f"[PDI Check] Settings values: {settings_values}")
 
-        # Compare Excel vs Settings (only DEC part - Excel doesn't have HEX)
+        # Compare Excel vs Settings (both HEX middle part and DEC end part)
         results = []
 
-        # HWEL comparison - only DEC matters
+        # HWEL comparison - both parts must match
+        hwel_hex_match = hwel_hex_excel == settings_values["HWEL"]["hex"]
         hwel_dec_match = hwel_dec_excel == settings_values["HWEL"]["dec"]
+        hwel_overall = hwel_hex_match and hwel_dec_match
         results.append({
             "Field": "HWEL",
             "ExcelHex": hwel_hex_excel,
             "ExcelDec": hwel_dec_excel,
             "SettingsHex": settings_values["HWEL"]["hex"],
             "SettingsDec": settings_values["HWEL"]["dec"],
-            "HexMatch": "N/A",  # Excel doesn't have HEX
+            "HexMatch": "OK" if hwel_hex_match else "NOK",
             "DecMatch": "OK" if hwel_dec_match else "NOK",
-            "Result": "OK" if hwel_dec_match else "NOK"
+            "Result": "OK" if hwel_overall else "NOK"
         })
 
-        # BTLD comparison - only DEC matters
+        # BTLD comparison - both parts must match
+        btld_hex_match = btld_hex_excel == settings_values["BTLD"]["hex"]
         btld_dec_match = btld_dec_excel == settings_values["BTLD"]["dec"]
+        btld_overall = btld_hex_match and btld_dec_match
         results.append({
             "Field": "BTLD",
             "ExcelHex": btld_hex_excel,
             "ExcelDec": btld_dec_excel,
             "SettingsHex": settings_values["BTLD"]["hex"],
             "SettingsDec": settings_values["BTLD"]["dec"],
-            "HexMatch": "N/A",  # Excel doesn't have HEX
+            "HexMatch": "OK" if btld_hex_match else "NOK",
             "DecMatch": "OK" if btld_dec_match else "NOK",
-            "Result": "OK" if btld_dec_match else "NOK"
+            "Result": "OK" if btld_overall else "NOK"
         })
 
-        # SWFL comparison - only DEC matters
+        # SWFL comparison - both parts must match
+        swfl_hex_match = swfl_hex_excel == settings_values["SWFL"]["hex"]
         swfl_dec_match = swfl_dec_excel == settings_values["SWFL"]["dec"]
+        swfl_overall = swfl_hex_match and swfl_dec_match
         results.append({
             "Field": "SWFL",
             "ExcelHex": swfl_hex_excel,
             "ExcelDec": swfl_dec_excel,
             "SettingsHex": settings_values["SWFL"]["hex"],
             "SettingsDec": settings_values["SWFL"]["dec"],
-            "HexMatch": "N/A",  # Excel doesn't have HEX
+            "HexMatch": "OK" if swfl_hex_match else "NOK",
             "DecMatch": "OK" if swfl_dec_match else "NOK",
-            "Result": "OK" if swfl_dec_match else "NOK"
+            "Result": "OK" if swfl_overall else "NOK"
         })
 
         final_result = "NOK" if any(r["Result"] == "NOK" for r in results) else "OK"
