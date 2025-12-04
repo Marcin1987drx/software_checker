@@ -42,6 +42,9 @@ logging.info("========================================")
 logging.info(f"=== PID: {os.getpid()} Starting Software Checker Server (v3.0.0 - PDI Check) ===")
 logging.info("Step 1: Early logging initialized. Attempting library imports...")
 
+# Check if we should use WebView (native app window) instead of browser
+USE_WEBVIEW = True  # Set to False to use browser instead
+
 
 try:
     from lxml import etree as ET
@@ -86,6 +89,16 @@ try:
     except ImportError:
         WINDOWS_TOASTS_ENABLED = False
         logging.warning("'windows-toasts' library not found. Desktop notifications disabled.")
+
+    # IMPORT for WebView (native app window)
+    try:
+        import webview
+        WEBVIEW_AVAILABLE = True
+        logging.info("Import 'webview' successful. Native window mode available.")
+    except ImportError:
+        WEBVIEW_AVAILABLE = False
+        logging.warning("'webview' library not found. Will use browser mode.")
+        webview = None
 
 except ImportError as e:
     logging.critical(f"=== CRITICAL IMPORT FAILURE: {e} ===")
@@ -1189,25 +1202,56 @@ if __name__ == '__main__':
 
                 ACTUAL_PORT = test_port
 
-                # === AUTO-START BROWSER ===
-                try:
-                    import webbrowser
+                # === START UI (WebView or Browser) ===
+                if USE_WEBVIEW and WEBVIEW_AVAILABLE:
+                    # Native app window mode
+                    logging.info("Starting in WebView (native window) mode...")
+                    
+                    def start_server():
+                        """Start Flask server in background thread."""
+                        app.run(port=ACTUAL_PORT, debug=False, host='127.0.0.1', use_reloader=False, threaded=True)
+                    
+                    # Start Flask in background
+                    server_thread = threading.Thread(target=start_server, daemon=True)
+                    server_thread.start()
+                    
+                    # Wait for server to start
+                    time.sleep(2)
+                    
+                    # Create native window
+                    webview.create_window(
+                        'Software Checker',
+                        f'http://127.0.0.1:{ACTUAL_PORT}',
+                        width=1200,
+                        height=800,
+                        resizable=True,
+                        fullscreen=False,
+                        min_size=(800, 600)
+                    )
+                    webview.start()
+                    logging.info("WebView window closed. Shutting down...")
+                    
+                else:
+                    # Browser mode (fallback)
+                    logging.info("Starting in Browser mode...")
+                    try:
+                        import webbrowser
 
-                    def open_browser():
-                        """Opens browser after 5 second delay."""
-                        try:
-                            time.sleep(5)
-                            webbrowser.open(f'http://127.0.0.1:{ACTUAL_PORT}')
-                            logging.info(f"Browser opened for http://127.0.0.1:{ACTUAL_PORT}")
-                        except Exception as e:
-                            logging.warning(f"Could not open browser: {e}")
+                        def open_browser():
+                            """Opens browser after 5 second delay."""
+                            try:
+                                time.sleep(5)
+                                webbrowser.open(f'http://127.0.0.1:{ACTUAL_PORT}')
+                                logging.info(f"Browser opened for http://127.0.0.1:{ACTUAL_PORT}")
+                            except Exception as e:
+                                logging.warning(f"Could not open browser: {e}")
 
-                    threading.Thread(target=open_browser, daemon=True).start()
-                    logging.info("Browser launch scheduled (5s delay)...")
-                except Exception as e:
-                    logging.warning(f"Browser auto-launch disabled: {e}")
+                        threading.Thread(target=open_browser, daemon=True).start()
+                        logging.info("Browser launch scheduled (5s delay)...")
+                    except Exception as e:
+                        logging.warning(f"Browser auto-launch disabled: {e}")
 
-                app.run(port=ACTUAL_PORT, debug=False, host='127.0.0.1', use_reloader=False, threaded=True)
+                    app.run(port=ACTUAL_PORT, debug=False, host='127.0.0.1', use_reloader=False, threaded=True)
                 break
 
             except OSError as e:

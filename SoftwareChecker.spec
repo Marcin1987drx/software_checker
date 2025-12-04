@@ -22,6 +22,7 @@ a = Analysis(
         'openpyxl.cell',
         'openpyxl.cell.cell',
         'tkinter',
+        'webview',
     ],
     hookspath=[],
     hooksconfig={},
