@@ -44,9 +44,6 @@ app/user_data/
 user_data/
 *.log
 
-# Generated icon (auto-created from logo.png)
-icon.ico
-
 # OS
 .DS_Store
 Thumbs.db
