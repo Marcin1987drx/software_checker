@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Software Checker</title> 
     <link rel="icon" href="data:,">
     <style>
@@ -1415,12 +1418,17 @@
                 const response = await fetch(`${API_URL}/api/pdi-check`, { method: 'POST' });
                 const result = await response.json();
                 
-                if (!response.ok) {
-                    tableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--status-error);">${result.error || 'Error'}</td></tr>`;
+                console.log('PDI Check response:', result); // Debug
+                
+                if (!response.ok || result.success === false) {
+                    const errorMsg = t(result.error) || result.error || 'Unknown error';
+                    tableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--status-error);">${errorMsg}</td></tr>`;
                     return;
                 }
                 
-                renderPdiResults(result);
+                // If backend wraps data in 'data' property
+                const dataToRender = result.data || result;
+                renderPdiResults(dataToRender);
                 await loadRecentPdiChecks(); // Refresh history
             } catch (error) {
                 console.error('PDI Check failed:', error);
