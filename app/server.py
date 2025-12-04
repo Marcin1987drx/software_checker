@@ -1098,6 +1098,69 @@ def generate_smac_json():
         return jsonify({"error": "Failed to generate SMAC JSON"}), 500
 
 
+@app.route('/api/download-smac-json', methods=['POST'])
+def download_smac_json():
+    """Generate and download SMAC JSON file (WebView compatible)."""
+    try:
+        data = request.json
+        snr = data.get('snr', 'unknown')
+        
+        smac_json = json.loads(json.dumps(SMAC_TEMPLATE))
+        items_list = smac_json["testStepResults"][0]["iterations"][0]["resultItems"][0]["resultItems"]
+        for item in items_list:
+            if item["name"] == "SGBM_ID[0][0]":
+                item["value"] = _convert_id_to_smac_format(data.get('hwelId', ''))
+            elif item["name"] == "SGBM_ID[0][1]":
+                item["value"] = _convert_id_to_smac_format(data.get('btldId', ''))
+            elif item["name"] == "SGBM_ID[0][2]":
+                item["value"] = _convert_id_to_smac_format(data.get('swflId', ''))
+        
+        from flask import Response
+        json_str = json.dumps(smac_json, indent=2)
+        
+        return Response(
+            json_str,
+            mimetype='application/json',
+            headers={
+                'Content-Disposition': f'attachment; filename=SMAC_{snr}.json'
+            }
+        )
+    except Exception as e:
+        logging.error(f"Error downloading SMAC JSON: {e}", exc_info=True)
+        return jsonify({"error": "Failed to download SMAC JSON"}), 500
+
+
+@app.route('/api/download-screenshot', methods=['POST'])
+def download_screenshot():
+    """Download screenshot as JPEG (WebView compatible)."""
+    try:
+        data = request.json
+        image_data = data.get('imageData', '')
+        dmc = data.get('dmc', 'unknown')
+        
+        if not image_data or not image_data.startswith('data:image'):
+            return jsonify({"error": "Invalid image data"}), 400
+        
+        # Remove data URL prefix
+        import base64
+        header, encoded = image_data.split(',', 1)
+        image_bytes = base64.b64decode(encoded)
+        
+        from flask import Response
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        
+        return Response(
+            image_bytes,
+            mimetype='image/jpeg',
+            headers={
+                'Content-Disposition': f'attachment; filename=Report_DMC_{dmc}_{timestamp}.jpg'
+            }
+        )
+    except Exception as e:
+        logging.error(f"Error downloading screenshot: {e}", exc_info=True)
+        return jsonify({"error": "Failed to download screenshot"}), 500
+
+
 @app.route('/api/factory-reset', methods=['POST'])
 def factory_reset():
     logging.warning("=== FACTORY RESET ===")

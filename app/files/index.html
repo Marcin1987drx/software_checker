@@ -1799,14 +1799,26 @@
                 });
 
                 const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
-                const link = document.createElement('a');
-                link.href = dataUrl;
                 const dmc = resultDmc.textContent;
-                const date = new Date().toISOString().slice(0, 19).replace(/:/g, '-').replace('T', '_');
-                link.download = `Report_DMC_${dmc}_${date}.jpg`;
+                
+                // Use backend download for WebView compatibility
+                const response = await fetch(`${API_URL}/api/download-screenshot`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ imageData: dataUrl, dmc: dmc })
+                });
+                
+                if (!response.ok) throw new Error('Download failed');
+                
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = response.headers.get('Content-Disposition').match(/filename=(.+)/)[1];
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
           
             } catch(err) {
                 console.error("Error creating JPG:", err);
@@ -1824,29 +1836,33 @@
                 return;
             }
           
+            const snr = currentResultData.snr || "UNKNOWN_SNR";
             const payload = {
                 hwelId: currentResultData.settingsHwelOriginalId || "",
                 btldId: currentResultData.settingsBtldOriginalId || "",
-                swflId: currentResultData.settingsSwflOriginalId || ""
+                swflId: currentResultData.settingsSwflOriginalId || "",
+                snr: snr
             };
           
             try {
-                const response = await fetch(`${API_URL}/api/generate-smac-json`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+                // Use backend download for WebView compatibility
+                const response = await fetch(`${API_URL}/api/download-smac-json`, {
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify(payload)
                 });
               
                 if (!response.ok) { throw new Error(t('internalError')); }
               
-                const smacJson = await response.json();
-              
-                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(smacJson, null, 2));
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
                 const downloadAnchorNode = document.createElement('a');
-                downloadAnchorNode.setAttribute("href", dataStr);
-                const snr = currentResultData.snr || "UNKNOWN_SNR";
-                downloadAnchorNode.setAttribute("download", `SMAC_${snr}.json`);
+                downloadAnchorNode.href = url;
+                downloadAnchorNode.download = `SMAC_${snr}.json`;
                 document.body.appendChild(downloadAnchorNode); 
                 downloadAnchorNode.click();
                 document.body.removeChild(downloadAnchorNode);
+                window.URL.revokeObjectURL(url);
           
             } catch (error) {
                 console.error("Error generating or downloading SMAC JSON:", error);
