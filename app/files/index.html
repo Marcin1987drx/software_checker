@@ -1431,38 +1431,47 @@
         function renderPdiResults(result) {
             const tableBody = document.getElementById('pdi-check-table-body');
             const snr = result.snr || 'N/A';
-            const timestamp = result.timestamp || '';
+            const finalResult = result.finalResult || result.overall_status || 'N/A';
+            const settingsFile = result.settingsFile || '';
+            const settingsDate = result.settingsDate || '';
             
             tableBody.innerHTML = '';
             
-            // Overall status row
+            // Overall status row with settings info
             const headerRow = document.createElement('tr');
+            const statusClass = finalResult === 'OK' ? 'OK' : 'NOK';
             headerRow.innerHTML = `
-                <td colspan="6" style="background: var(--bg-secondary); font-weight: bold;">
-                    SNR: ${snr} | Time: ${timestamp} | Status: 
-                    <span class="${result.overall_status === 'OK' ? 'OK' : 'NOK'}">${result.overall_status}</span>
+                <td colspan="7" style="background: var(--bg-secondary); font-weight: bold; padding: 12px;">
+                    SNR: ${snr} | Settings: ${settingsDate || settingsFile} | 
+                    <span class="${statusClass}" style="font-size: 1.1em;">${finalResult}</span>
                 </td>
             `;
             tableBody.appendChild(headerRow);
             
-            // Component rows
-            ['hwel', 'btld', 'swfl'].forEach(comp => {
-                const data = result.components[comp];
-                if (!data) return;
-                
-                const row = document.createElement('tr');
-                const statusClass = data.status === 'OK' ? 'OK' : 'NOK';
-                
-                row.innerHTML = `
-                    <td>${comp.toUpperCase()}</td>
-                    <td>${data.excel_hex || 'N/A'}</td>
-                    <td>${data.excel_dec || 'N/A'}</td>
-                    <td>${data.settings_hex || 'N/A'}</td>
-                    <td>${data.settings_dec || 'N/A'}</td>
-                    <td class="${statusClass}">${data.status}</td>
-                `;
-                tableBody.appendChild(row);
-            });
+            // Component rows from results array
+            if (result.results && Array.isArray(result.results)) {
+                result.results.forEach(item => {
+                    const row = document.createElement('tr');
+                    const hexMatch = item.HexMatch || 'N/A';
+                    const decMatch = item.DecMatch || 'N/A';
+                    const overallStatus = item.Result || 'N/A';
+                    
+                    // Color coding for each cell
+                    const hexClass = hexMatch === 'OK' ? 'OK' : (hexMatch === 'NOK' ? 'NOK' : '');
+                    const decClass = decMatch === 'OK' ? 'OK' : (decMatch === 'NOK' ? 'NOK' : '');
+                    const statusClass = overallStatus === 'OK' ? 'OK' : 'NOK';
+                    
+                    row.innerHTML = `
+                        <td style="font-weight: bold;">${item.Field}</td>
+                        <td>${item.ExcelHex || 'N/A'}</td>
+                        <td>${item.ExcelDec || 'N/A'}</td>
+                        <td class="${hexClass}">${item.SettingsHex || 'N/A'} ${hexMatch !== 'N/A' ? '<small>(' + hexMatch + ')</small>' : ''}</td>
+                        <td class="${decClass}">${item.SettingsDec || 'N/A'} ${decMatch !== 'N/A' ? '<small>(' + decMatch + ')</small>' : ''}</td>
+                        <td class="${statusClass}" style="font-weight: bold;">${overallStatus}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            }
         }
         
         async function loadRecentPdiChecks() {
@@ -1490,11 +1499,12 @@
             recentPdiChecks.slice(0, 10).forEach(check => {
                 const div = document.createElement('div');
                 div.className = 'live-session-item';
-                const statusClass = check.overall_status === 'OK' ? 'OK' : 'NOK';
+                const finalResult = check.finalResult || check.overall_status || 'N/A';
+                const statusClass = finalResult === 'OK' ? 'OK' : 'NOK';
                 
                 div.innerHTML = `
                     <div>${check.timestamp || 'N/A'} | <strong>SNR: ${check.snr || 'N/A'}</strong></div>
-                    <div class="live-session-result ${statusClass}">${check.overall_status}</div>
+                    <div class="live-session-result ${statusClass}">${finalResult}</div>
                 `;
                 container.appendChild(div);
             });
