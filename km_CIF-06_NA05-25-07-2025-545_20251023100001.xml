@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<kontrollmitteilung eek="CIF-06" iStufe="NA05-25-07-545" kcName="CIF__06__NA05.019_048_001.pdx">
+    <hardware name="ZB LADEDOSE GEN6 NCAR CCS2" snr="5B7FD36">
+        <te id="BTLD_0000C15B_019.040.002" description="Bootloader Ladedosen GEN6 Combo/TWIN (scharfsigniert)"/>
+        <te id="HWEL_0000B08B_002.030.020" description="Ladedose GEN6 CCS ECE"/>
+        <te id="SWFL_0000C15F_019.040.003" description="Software Ladedosen GEN6 Combo/TWIN (scharfsigniert)"/>
+    </hardware>
+</kontrollmitteilung>

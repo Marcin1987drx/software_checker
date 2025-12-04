@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<kontrollmitteilung eek="CIF-06" iStufe="NA00-28-03-210" kcName="CIF__06__NA05.019_050_003.pdx">
+    <hardware name="ZB LADEDOSE GEN6 NCAR CCS1" snr="5B7FD37">
+        <te id="BTLD_0000C15B_019.040.003" description="Bootloader Ladedosen GEN6 Combo/TWIN (scharfsigniert)"/>
+        <te id="HWEL_0000B08C_002.030.020" description="Ladedose GEN6 CCS US"/>
+        <te id="SWFL_0000C15F_019.040.003" description="Software Ladedosen GEN6 Combo/TWIN (scharfsigniert)"/>
+    </hardware>
+    <hardware name="ZB LADEDOSE GEN6 NCAR CCS2" snr="5B7FD36">
+        <te id="BTLD_0000C15B_019.040.002" description="Bootloader Ladedosen GEN6 Combo/TWIN (scharfsigniert)"/>
+        <te id="HWEL_0000B08B_002.030.020" description="Ladedose GEN6 CCS ECE"/>
+        <te id="SWFL_0000C15F_019.040.003" description="Software Ladedosen GEN6 Combo/TWIN (scharfsigniert)"/>
+    </hardware>
+    <hardware name="ZB LADEDOSE GEN6 NCAR CN TWIN" snr="5B7FD39">
+        <te id="BTLD_0000C15B_019.040.002" description="Bootloader Ladedosen GEN6 Combo/TWIN (scharfsigniert)"/>
+        <te id="HWEL_0000BD00_002.030.020" description="Ladedose GEN6 TWIN-CN"/>
+        <te id="SWFL_0000C15F_019.040.003" description="Software Ladedosen GEN6 Combo/TWIN (scharfsigniert)"/>
+    </hardware>
+    <hardware name="ZB LADEDOSE GEN6 NCAR JP TWIN" snr="5B7FD38">
+        <te id="BTLD_0000C15B_019.040.002" description="Bootloader Ladedosen GEN6 Combo/TWIN (scharfsigniert)"/>
+        <te id="HWEL_0000B08D_002.030.020" description="Ladedose GEN6 TWIN-JP"/>
+        <te id="SWFL_0000C15F_019.040.003" description="Software Ladedosen GEN6 Combo/TWIN (scharfsigniert)"/>
+    </hardware>
+    <hardware name="ZB LADEDOSE GEN6 NCAR NACS" snr="5B8E1E2">
+        <te id="BTLD_0000DEC8_019.040.001" description="Bootloader Ladedose GEN6 NACS (scharfsigniert)"/>
+        <te id="HWEL_0000C390_002.030.030" description="Ladedose GEN6 NACS (North American Charging Standard)"/>
+        <te id="SWFL_0000DEC9_019.040.002" description="Software Ladedose GEN6 NACS (scharfsigniert)"/>
+    </hardware>
+</kontrollmitteilung>
