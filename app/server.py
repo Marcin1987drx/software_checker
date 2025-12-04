@@ -698,11 +698,10 @@ def process_pdi_check(excel_file_path, settings_folder_str):
 
         logging.info(f"[PDI Check] Settings values: {settings_values}")
 
-        # Compare Excel vs Settings
+        # Compare Excel vs Settings (only DEC part - Excel doesn't have HEX)
         results = []
 
-        # HWEL comparison
-        hwel_hex_match = hwel_hex_excel == settings_values["HWEL"]["hex"]
+        # HWEL comparison - only DEC matters
         hwel_dec_match = hwel_dec_excel == settings_values["HWEL"]["dec"]
         results.append({
             "Field": "HWEL",
@@ -710,13 +709,12 @@ def process_pdi_check(excel_file_path, settings_folder_str):
             "ExcelDec": hwel_dec_excel,
             "SettingsHex": settings_values["HWEL"]["hex"],
             "SettingsDec": settings_values["HWEL"]["dec"],
-            "HexMatch": "OK" if hwel_hex_match else "NOK",
+            "HexMatch": "N/A",  # Excel doesn't have HEX
             "DecMatch": "OK" if hwel_dec_match else "NOK",
-            "Result": "OK" if (hwel_hex_match and hwel_dec_match) else "NOK"
+            "Result": "OK" if hwel_dec_match else "NOK"
         })
 
-        # BTLD comparison
-        btld_hex_match = btld_hex_excel == settings_values["BTLD"]["hex"]
+        # BTLD comparison - only DEC matters
         btld_dec_match = btld_dec_excel == settings_values["BTLD"]["dec"]
         results.append({
             "Field": "BTLD",
@@ -724,13 +722,12 @@ def process_pdi_check(excel_file_path, settings_folder_str):
             "ExcelDec": btld_dec_excel,
             "SettingsHex": settings_values["BTLD"]["hex"],
             "SettingsDec": settings_values["BTLD"]["dec"],
-            "HexMatch": "OK" if btld_hex_match else "NOK",
+            "HexMatch": "N/A",  # Excel doesn't have HEX
             "DecMatch": "OK" if btld_dec_match else "NOK",
-            "Result": "OK" if (btld_hex_match and btld_dec_match) else "NOK"
+            "Result": "OK" if btld_dec_match else "NOK"
         })
 
-        # SWFL comparison
-        swfl_hex_match = swfl_hex_excel == settings_values["SWFL"]["hex"]
+        # SWFL comparison - only DEC matters
         swfl_dec_match = swfl_dec_excel == settings_values["SWFL"]["dec"]
         results.append({
             "Field": "SWFL",
@@ -738,9 +735,9 @@ def process_pdi_check(excel_file_path, settings_folder_str):
             "ExcelDec": swfl_dec_excel,
             "SettingsHex": settings_values["SWFL"]["hex"],
             "SettingsDec": settings_values["SWFL"]["dec"],
-            "HexMatch": "OK" if swfl_hex_match else "NOK",
+            "HexMatch": "N/A",  # Excel doesn't have HEX
             "DecMatch": "OK" if swfl_dec_match else "NOK",
-            "Result": "OK" if (swfl_hex_match and swfl_dec_match) else "NOK"
+            "Result": "OK" if swfl_dec_match else "NOK"
         })
 
         final_result = "NOK" if any(r["Result"] == "NOK" for r in results) else "OK"
