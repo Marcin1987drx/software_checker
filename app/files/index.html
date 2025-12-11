@@ -176,6 +176,7 @@
             position: sticky; top: 0; 
             border-bottom: 1px solid var(--border-color);
             font-weight: 600;
+            vertical-align: middle;
         }
         #results-table td, #history-table td {
              border-bottom: 1px solid var(--border-color);
@@ -685,8 +686,12 @@
                         <canvas id="nok-pie-chart-analysis"></canvas> 
                     </div>
                     <div class="chart-container">
-                        <h4 style="margin-bottom: 10px; color: var(--text-primary); text-align: center;" data-i18n="nokBreakdown">NOK Failure Breakdown</h4>
+                        <h4 style="margin-bottom: 10px; color: var(--text-primary); text-align: center;" data-i18n="nokBreakdown">NOK Failure Breakdown (Manual Checking)</h4>
                         <canvas id="nok-bar-chart-analysis"></canvas> 
+                    </div>
+                    <div class="chart-container">
+                        <h4 style="margin-bottom: 10px; color: var(--text-primary); text-align: center;" data-i18n="nokBreakdownPdi">NOK Failure Breakdown (PDI Check)</h4>
+                        <canvas id="nok-bar-chart-pdi"></canvas> 
                     </div>
                 </div>
 
@@ -846,7 +851,8 @@
                 noRecentScans: "Brak ostatnich skanów.",
                 statisticalAnalysis: "Analiza Statystyczna (Cały Czas)",
                 okVsNok: "OK vs NOK (Łącznie)",
-                nokBreakdown: "Podział Awarii NOK",
+                nokBreakdown: "Podział Awarii NOK (Manual Checking)",
+                nokBreakdownPdi: "Podział Awarii NOK (PDI Check)",
                 exportTools: "Narzędzia Eksportu:",
                 recentWatchdogEvents: "Ostatnie Zdarzenia Watchdoga (z results.csv):",
                 timestampHeader: "Znacznik Czasu",
@@ -921,7 +927,8 @@
                 noRecentScans: "No recent scans.",
                 statisticalAnalysis: "Statistical Analysis (All Time)",
                 okVsNok: "OK vs NOK (Total)",
-                nokBreakdown: "NOK Failure Breakdown",
+                nokBreakdown: "NOK Failure Breakdown (Manual Checking)",
+                nokBreakdownPdi: "NOK Failure Breakdown (PDI Check)",
                 exportTools: "Export Tools:",
                 recentWatchdogEvents: "Recent Watchdog Events (from results.csv):",
                 timestampHeader: "Timestamp",
@@ -996,7 +1003,8 @@
                  noRecentScans: "Keine letzten Scans.",
                  statisticalAnalysis: "Statistische Analyse (Gesamtzeit)",
                  okVsNok: "OK vs NOK (Gesamt)",
-                 nokBreakdown: "NOK-Fehleraufschlüsselung",
+                 nokBreakdown: "NOK-Fehleraufschlüsselung (Manuelle Prüfung)",
+                 nokBreakdownPdi: "NOK-Fehleraufschlüsselung (PDI-Prüfung)",
                  exportTools: "Export-Tools:",
                  recentWatchdogEvents: "Letzte Watchdog-Ereignisse (aus results.csv):",
                  timestampHeader: "Zeitstempel",
@@ -1071,7 +1079,8 @@
                  noRecentScans: "Nu există scanări recente.",
                  statisticalAnalysis: "Analiză Statistică (Tot Timpul)",
                  okVsNok: "OK vs NOK (Total)",
-                 nokBreakdown: "Defalcare Eșecuri NOK",
+                 nokBreakdown: "Defalcare Eșecuri NOK (Verificare Manuală)",
+                 nokBreakdownPdi: "Defalcare Eșecuri NOK (Verificare PDI)",
                  exportTools: "Instrumente de Export:",
                  recentWatchdogEvents: "Evenimente Recente Watchdog (din results.csv):",
                  timestampHeader: "Marcaj de Timp",
@@ -1124,7 +1133,7 @@
         const resultsTableBody = $('results-table-body'), resultDmc = $('result-dmc'), resultSnr = $('result-snr'), resultSettingsFile = $('result-settings-file'), resultSettingsDate = $('result-settings-date'), finalResult = $('final-result'), saveReportJpgBtn = $('save-report-jpg'), generateSmacJsonBtn = $('generate-smac-json');
         const historyTableBody = $('history-table-body'), historyDateFrom = $('history-date-from'), historyDateTo = $('history-date-to'), historyApplyFilterBtn = $('history-apply-filter'), historyClearFilterBtn = $('history-clear-filter'), historyRefreshBtn = $('history-refresh'), exportHistoryCsvBtn = $('export-history-csv');
         
-        const nokPieChartAnalysis = $('nok-pie-chart-analysis'), nokBarChartAnalysis = $('nok-bar-chart-analysis');
+        const nokPieChartAnalysis = $('nok-pie-chart-analysis'), nokBarChartAnalysis = $('nok-bar-chart-analysis'), nokBarChartPdi = $('nok-bar-chart-pdi');
         
         const statusDot = $('status-dot'), statusText = $('status-text');
         const hwelIdInput = $('hwel-id-input'), btldIdInput = $('btld-id-input'), swflIdInput = $('swfl-id-input');
@@ -1139,7 +1148,7 @@
         let config = { ...DEFAULT_CONFIG };
         let globalHistoryData = [];
         let historySort = { col: 'timestamp', asc: false };
-        let pieChartAnalysisInstance = null; let barChartAnalysisInstance = null; // Instancje dla Analysis
+        let pieChartAnalysisInstance = null; let barChartAnalysisInstance = null; let barChartPdiInstance = null; // Instancje dla Analysis
         let currentResultData = null; 
         
         // --- PDI CHECK LOGIC ---
@@ -1844,6 +1853,7 @@
             // Wyczyść stare instancje
             if (pieChartAnalysisInstance) pieChartAnalysisInstance.destroy(); 
             if (barChartAnalysisInstance) barChartAnalysisInstance.destroy();
+            if (barChartPdiInstance) barChartPdiInstance.destroy();
             
             try {
                 const responseStats = await fetch(`${API_URL}/api/get-stats`); 
@@ -1853,8 +1863,10 @@
                 const isDarkMode = config.theme === 'dark'; 
                 const textColor = isDarkMode ? 'rgba(248, 249, 250, 0.8)' : 'rgba(11, 15, 16, 0.8)'; 
                 
-                // 1. Wykres Kołowy (OK vs NOK)
-                const pieData = { labels: ['OK', 'NOK'], datasets: [{ data: [stats.total_ok, stats.total_nok], 
+                // 1. Wykres Kołowy (OK vs NOK) - łączne dane Manual + PDI
+                const totalOk = stats.total_ok + stats.pdi_total_ok;
+                const totalNok = stats.total_nok + stats.pdi_total_nok;
+                const pieData = { labels: ['OK', 'NOK'], datasets: [{ data: [totalOk, totalNok], 
                     backgroundColor: [ getComputedStyle(document.documentElement).getPropertyValue('--status-ok'), 
                     getComputedStyle(document.documentElement).getPropertyValue('--status-error') ], 
                     borderColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-secondary'), borderWidth: 2 }] };
@@ -1874,7 +1886,7 @@
                         }, title: { display: false } } } 
                 });
 
-                // 2. Wykres Słupkowy (NOK Breakdown)
+                // 2. Wykres Słupkowy (NOK Breakdown - Manual Checking)
                 const barLabels = Object.keys(stats.nok_details); 
                 const barValues = Object.values(stats.nok_details);
                 const barData = { 
@@ -1909,6 +1921,40 @@
                             }, title: { display: false } } } 
                 });
 
+                // 3. Wykres Słupkowy (NOK Breakdown - PDI Check)
+                const pdiBarLabels = Object.keys(stats.pdi_nok_details); 
+                const pdiBarValues = Object.values(stats.pdi_nok_details);
+                const pdiBarData = { 
+                    labels: pdiBarLabels, 
+                    datasets: [{ label: 'PDI NOK Count', data: pdiBarValues, 
+                        backgroundColor: '#ffc107', // Warning color for PDI
+                        borderColor: '#ffc107', borderWidth: 1 }] 
+                };
+                barChartPdiInstance = new Chart(nokBarChartPdi, { 
+                    type: 'bar', data: pdiBarData, options: { responsive: true, maintainAspectRatio: false, 
+                        layout: {
+                            padding: {
+                                left: 10,
+                                right: 10,
+                                top: 5,
+                                bottom: 5
+                            }
+                        },
+                        scales: { y: { beginAtZero: true, ticks: { color: textColor, padding: 5, font: { size: 10 } }, grid: { color: 'rgba(0,0,0,0)' } }, 
+                        x: { ticks: { color: textColor, font: { size: 10 } }, grid: { color: 'rgba(0,0,0,0)' } } }, 
+                        plugins: { 
+                            legend: { 
+                                display: true, 
+                                position: 'top', 
+                                align: 'center', 
+                                labels: { 
+                                    boxWidth: 15, 
+                                    padding: 8, 
+                                    font: { size: 11 },
+                                    color: textColor 
+                                } 
+                            }, title: { display: false } } } 
+                });
 
             } catch (error) { 
                 console.error("Failed to load analysis data:", error); 
@@ -2023,23 +2069,54 @@
                 if (!response.ok) throw new Error('Download failed');
                 
                 const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = response.headers.get('Content-Disposition').match(/filename=(.+)/)[1];
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                window.URL.revokeObjectURL(url);
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+                const filename = `Report_DMC_${dmc}_${timestamp}.jpg`;
+                
+                // Try pywebview API first, fallback to standard download
+                if (window.pywebview && window.pywebview.api) {
+                    try {
+                        const reader = new FileReader();
+                        reader.onloadend = function() {
+                            const base64data = reader.result.split(',')[1];
+                            window.pywebview.api.save_file(filename, base64data).then(() => {
+                                console.log('File saved via pywebview API');
+                            }).catch(err => {
+                                console.error('Pywebview save error:', err);
+                                // Fallback to standard download
+                                downloadBlobStandard(blob, filename);
+                            });
+                        };
+                        reader.readAsDataURL(blob);
+                    } catch (e) {
+                        console.error('Pywebview error:', e);
+                        downloadBlobStandard(blob, filename);
+                    }
+                } else {
+                    downloadBlobStandard(blob, filename);
+                }
           
             } catch(err) {
                 console.error("Error creating JPG:", err);
-                alert("Failed to generate JPG report.");
+                alert("Failed to generate JPG report: " + err.message);
             } finally {
                 headerClone.remove();
                 if (generator) generator.style.display = originalGeneratorDisplay;
-                mainContent.style.padding = originalPadding; // Przywrócenie oryginalnego paddingu
+                mainContent.style.padding = originalPadding;
             }
+        }
+        
+        function downloadBlobStandard(blob, filename) {
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            setTimeout(() => {
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+            }, 100);
         }
 
         async function onGenerateSmacJson() {
@@ -2067,14 +2144,29 @@
                 if (!response.ok) { throw new Error(t('internalError')); }
               
                 const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const downloadAnchorNode = document.createElement('a');
-                downloadAnchorNode.href = url;
-                downloadAnchorNode.download = `SMAC_${snr}.json`;
-                document.body.appendChild(downloadAnchorNode); 
-                downloadAnchorNode.click();
-                document.body.removeChild(downloadAnchorNode);
-                window.URL.revokeObjectURL(url);
+                const filename = `SMAC_${snr}.json`;
+                
+                // Try pywebview API first, fallback to standard download
+                if (window.pywebview && window.pywebview.api) {
+                    try {
+                        const reader = new FileReader();
+                        reader.onloadend = function() {
+                            const base64data = reader.result.split(',')[1];
+                            window.pywebview.api.save_file(filename, base64data).then(() => {
+                                console.log('SMAC file saved via pywebview API');
+                            }).catch(err => {
+                                console.error('Pywebview save error:', err);
+                                downloadBlobStandard(blob, filename);
+                            });
+                        };
+                        reader.readAsDataURL(blob);
+                    } catch (e) {
+                        console.error('Pywebview error:', e);
+                        downloadBlobStandard(blob, filename);
+                    }
+                } else {
+                    downloadBlobStandard(blob, filename);
+                }
           
             } catch (error) {
                 console.error("Error generating or downloading SMAC JSON:", error);

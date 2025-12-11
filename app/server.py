@@ -1012,36 +1012,53 @@ def export_history_csv():
 @app.route('/api/get-stats', methods=['GET'])
 def get_stats():
     stats = {"total_ok": 0, "total_nok": 0, "nok_details": defaultdict(int), "last_result": "N/A",
-             "last_timestamp": "N/A"}
+             "last_timestamp": "N/A", "pdi_total_ok": 0, "pdi_total_nok": 0, "pdi_nok_details": defaultdict(int)}
+    
+    # Manual checking stats (z CSV)
     csv_path = _get_csv_path(load_config_from_file())
-    if not csv_path or not csv_path.exists():
-        return jsonify(stats)
+    if csv_path and csv_path.exists():
+        try:
+            with open(csv_path, 'r', encoding='utf-8-sig') as f:
+                reader = csv.DictReader(f)
+                history = list(reader)
+
+                if history:
+                    latest = history[-1]
+                    stats['last_result'] = latest.get('final', 'N/A')
+                    stats['last_timestamp'] = latest.get('timestamp', 'N/A')
+
+                for row in history:
+                    if row.get('final') == 'OK':
+                        stats['total_ok'] += 1
+                    elif row.get('final') == 'NOK':
+                        stats['total_nok'] += 1
+                        if row.get('hwel_report') != row.get('hwel_set'):
+                            stats['nok_details']['HWEL'] += 1
+                        if row.get('btld_report') != row.get('btld_set'):
+                            stats['nok_details']['BTLD'] += 1
+                        if row.get('swfl_report') != row.get('swfl_set'):
+                            stats['nok_details']['SWFL'] += 1
+
+        except Exception as e:
+            logging.error(f"Error calculating stats from CSV {csv_path}: {e}", exc_info=True)
+    
+    # PDI checks stats (z JSON)
     try:
-        with open(csv_path, 'r', encoding='utf-8-sig') as f:
-            reader = csv.DictReader(f)
-            history = list(reader)
-
-            if history:
-                latest = history[-1]
-                stats['last_result'] = latest.get('final', 'N/A')
-                stats['last_timestamp'] = latest.get('timestamp', 'N/A')
-
-            for row in history:
-                if row.get('final') == 'OK':
-                    stats['total_ok'] += 1
-                elif row.get('final') == 'NOK':
-                    stats['total_nok'] += 1
-                    if row.get('hwel_report') != row.get('hwel_set'):
-                        stats['nok_details']['HWEL'] += 1
-                    if row.get('btld_report') != row.get('btld_set'):
-                        stats['nok_details']['BTLD'] += 1
-                    if row.get('swfl_report') != row.get('swfl_set'):
-                        stats['nok_details']['SWFL'] += 1
-
-        return jsonify(stats)
+        pdi_checks = _get_recent_pdi_checks()
+        for pdi in pdi_checks:
+            if pdi.get('finalResult') == 'OK':
+                stats['pdi_total_ok'] += 1
+            elif pdi.get('finalResult') == 'NOK':
+                stats['pdi_total_nok'] += 1
+                # Zliczamy NOK dla poszczególnych pól w PDI
+                for result in pdi.get('results', []):
+                    if result.get('match') == False:
+                        field_name = result.get('field', 'UNKNOWN')
+                        stats['pdi_nok_details'][field_name] += 1
     except Exception as e:
-        logging.error(f"Error calculating stats from CSV {csv_path}: {e}", exc_info=True)
-        return jsonify({"error": str(e)}), 500
+        logging.error(f"Error calculating PDI stats: {e}", exc_info=True)
+    
+    return jsonify(stats)
 
 
 SMAC_TEMPLATE = {"documentVersion": "1.0", "comment": "", "testStepResults": [{"step": 1,
