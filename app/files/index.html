@@ -2094,8 +2094,10 @@
                                 const result = await window.pywebview.api.save_file(filename, base64data);
                                 if (result && result.success) {
                                     console.log('File saved successfully:', result.path);
+                                    alert(`✓ File saved to Downloads\n\nFilename: ${result.filename || filename}\n\nOpen your Downloads folder to view the file.`);
                                 } else {
-                                    console.log('File save cancelled or failed');
+                                    console.log('File save failed:', result.message);
+                                    alert('Failed to save file: ' + (result.message || 'Unknown error'));
                                 }
                             } catch (err) {
                                 console.error('Pywebview API error:', err);
@@ -2174,8 +2176,10 @@
                                 const result = await window.pywebview.api.save_file(filename, base64data);
                                 if (result && result.success) {
                                     console.log('SMAC file saved successfully:', result.path);
+                                    alert(`✓ SMAC file saved to Downloads\n\nFilename: ${result.filename || filename}\n\nOpen your Downloads folder to view the file.`);
                                 } else {
-                                    console.log('SMAC file save cancelled or failed');
+                                    console.log('SMAC file save failed:', result.message);
+                                    alert('Failed to save SMAC file: ' + (result.message || 'Unknown error'));
                                 }
                             } catch (err) {
                                 console.error('Pywebview API error:', err);

@@ -147,41 +147,45 @@ class WebViewAPI:
     
     def save_file(self, filename, base64_data):
         """
-        Save file dialog for WebView.
+        Save file to Downloads folder.
         Called from JavaScript with filename and base64-encoded data.
         """
         try:
             import base64
+            from pathlib import Path
             
             # Decode base64 data
             file_data = base64.b64decode(base64_data)
             
-            # Determine file type for dialog
-            if filename.endswith('.json'):
-                file_types = ('JSON Files (*.json)', 'All files (*.*)')
-            elif filename.endswith('.jpg') or filename.endswith('.jpeg'):
-                file_types = ('JPEG Images (*.jpg;*.jpeg)', 'All files (*.*)')
-            else:
-                file_types = ('All files (*.*)',)
+            # Get Downloads folder
+            downloads_dir = Path.home() / 'Downloads'
+            if not downloads_dir.exists():
+                downloads_dir = Path.home() / 'Documents'  # Fallback
             
-            # Use pywebview's native save file dialog
-            # This is thread-safe and works in frozen apps
-            result = webview.windows[0].create_file_dialog(
-                webview.SAVE_DIALOG,
-                directory='',
-                save_filename=filename,
-                file_types=file_types
+            # Create unique filename if file exists
+            filepath = downloads_dir / filename
+            counter = 1
+            base_name = filepath.stem
+            extension = filepath.suffix
+            
+            while filepath.exists():
+                filepath = downloads_dir / f"{base_name}_{counter}{extension}"
+                counter += 1
+            
+            # Save file
+            with open(filepath, 'wb') as f:
+                f.write(file_data)
+            
+            logging.info(f"File saved to Downloads: {filepath}")
+            
+            # Send toast notification
+            send_toast(
+                "File Saved",
+                f"Saved: {filename}",
+                f"Location: {filepath.parent}"
             )
             
-            if result and len(result) > 0:
-                filepath = result[0] if isinstance(result, tuple) else result
-                with open(filepath, 'wb') as f:
-                    f.write(file_data)
-                logging.info(f"File saved via WebView API: {filepath}")
-                return {"success": True, "path": str(filepath)}
-            else:
-                logging.info("File save cancelled by user")
-                return {"success": False, "message": "Cancelled"}
+            return {"success": True, "path": str(filepath), "filename": filepath.name}
                 
         except Exception as e:
             logging.error(f"Error in WebView save_file: {e}", exc_info=True)
