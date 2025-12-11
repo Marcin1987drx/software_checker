@@ -141,6 +141,59 @@ CORS(app)
 logging.info("Step 3: Flask application initialized.")
 
 
+# === PyWebView API Class ===
+class WebViewAPI:
+    """API class for pywebview to expose Python functions to JavaScript."""
+    
+    def save_file(self, filename, base64_data):
+        """
+        Save file dialog for WebView.
+        Called from JavaScript with filename and base64-encoded data.
+        """
+        try:
+            import base64
+            from tkinter import filedialog
+            import tkinter as tk
+            
+            # Decode base64 data
+            file_data = base64.b64decode(base64_data)
+            
+            # Show save dialog
+            root = tk.Tk()
+            root.withdraw()
+            root.attributes('-topmost', True)
+            
+            # Determine file type and filter
+            if filename.endswith('.json'):
+                filetypes = [('JSON files', '*.json'), ('All files', '*.*')]
+            elif filename.endswith('.jpg') or filename.endswith('.jpeg'):
+                filetypes = [('JPEG images', '*.jpg *.jpeg'), ('All files', '*.*')]
+            else:
+                filetypes = [('All files', '*.*')]
+            
+            filepath = filedialog.asksaveasfilename(
+                title='Save file',
+                initialfile=filename,
+                filetypes=filetypes,
+                defaultextension=filename.split('.')[-1] if '.' in filename else ''
+            )
+            
+            root.destroy()
+            
+            if filepath:
+                with open(filepath, 'wb') as f:
+                    f.write(file_data)
+                logging.info(f"File saved via WebView API: {filepath}")
+                return {"success": True, "path": filepath}
+            else:
+                logging.info("File save cancelled by user")
+                return {"success": False, "message": "Cancelled"}
+                
+        except Exception as e:
+            logging.error(f"Error in WebView save_file: {e}", exc_info=True)
+            return {"success": False, "message": str(e)}
+
+
 # === Toast Notification Helper ===
 def send_toast(title, line1, line2=""):
     """Wysyła powiadomienie Windows Toast w osobnym wątku."""
@@ -1290,6 +1343,9 @@ if __name__ == '__main__':
                     # Native app window mode
                     logging.info("Starting in WebView (native window) mode...")
                     
+                    # Create API instance
+                    api = WebViewAPI()
+                    
                     def start_server():
                         """Start Flask server in background thread."""
                         app.run(port=ACTUAL_PORT, debug=False, host='127.0.0.1', use_reloader=False, threaded=True)
@@ -1301,7 +1357,7 @@ if __name__ == '__main__':
                     # Wait for server to start
                     time.sleep(2)
                     
-                    # Create native window
+                    # Create native window with API
                     webview.create_window(
                         'Software Checker',
                         f'http://127.0.0.1:{ACTUAL_PORT}',
@@ -1309,7 +1365,8 @@ if __name__ == '__main__':
                         height=800,
                         resizable=True,
                         fullscreen=False,
-                        min_size=(800, 600)
+                        min_size=(800, 600),
+                        js_api=api
                     )
                     webview.start()
                     logging.info("WebView window closed. Shutting down...")
