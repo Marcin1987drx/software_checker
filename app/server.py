@@ -152,39 +152,33 @@ class WebViewAPI:
         """
         try:
             import base64
-            from tkinter import filedialog
-            import tkinter as tk
             
             # Decode base64 data
             file_data = base64.b64decode(base64_data)
             
-            # Show save dialog
-            root = tk.Tk()
-            root.withdraw()
-            root.attributes('-topmost', True)
-            
-            # Determine file type and filter
+            # Determine file type for dialog
             if filename.endswith('.json'):
-                filetypes = [('JSON files', '*.json'), ('All files', '*.*')]
+                file_types = ('JSON Files (*.json)', 'All files (*.*)')
             elif filename.endswith('.jpg') or filename.endswith('.jpeg'):
-                filetypes = [('JPEG images', '*.jpg *.jpeg'), ('All files', '*.*')]
+                file_types = ('JPEG Images (*.jpg;*.jpeg)', 'All files (*.*)')
             else:
-                filetypes = [('All files', '*.*')]
+                file_types = ('All files (*.*)',)
             
-            filepath = filedialog.asksaveasfilename(
-                title='Save file',
-                initialfile=filename,
-                filetypes=filetypes,
-                defaultextension=filename.split('.')[-1] if '.' in filename else ''
+            # Use pywebview's native save file dialog
+            # This is thread-safe and works in frozen apps
+            result = webview.windows[0].create_file_dialog(
+                webview.SAVE_DIALOG,
+                directory='',
+                save_filename=filename,
+                file_types=file_types
             )
             
-            root.destroy()
-            
-            if filepath:
+            if result and len(result) > 0:
+                filepath = result[0] if isinstance(result, tuple) else result
                 with open(filepath, 'wb') as f:
                     f.write(file_data)
                 logging.info(f"File saved via WebView API: {filepath}")
-                return {"success": True, "path": filepath}
+                return {"success": True, "path": str(filepath)}
             else:
                 logging.info("File save cancelled by user")
                 return {"success": False, "message": "Cancelled"}

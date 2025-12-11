@@ -2016,7 +2016,18 @@
             loadRecentScans();
             setupListeners();
             startStatusPolling();
-            showCentralView(resultsView); 
+            showCentralView(resultsView);
+            
+            // Check if pywebview API is available
+            setTimeout(() => {
+                if (window.pywebview && window.pywebview.api) {
+                    console.log('✓ PyWebview API detected and ready');
+                    console.log('Available methods:', Object.keys(window.pywebview.api));
+                } else {
+                    console.log('⚠ PyWebview API not available - running in browser mode');
+                    console.log('File downloads will use standard browser method');
+                }
+            }, 1000);
         });
 
         // POZOSTAŁE FUNKCJE WERSJI 2.4.1 (dla kompatybilności)
@@ -2073,25 +2084,31 @@
                 const filename = `Report_DMC_${dmc}_${timestamp}.jpg`;
                 
                 // Try pywebview API first, fallback to standard download
-                if (window.pywebview && window.pywebview.api) {
+                if (window.pywebview && window.pywebview.api && window.pywebview.api.save_file) {
+                    console.log('Using pywebview API for file save');
                     try {
                         const reader = new FileReader();
-                        reader.onloadend = function() {
-                            const base64data = reader.result.split(',')[1];
-                            window.pywebview.api.save_file(filename, base64data).then(() => {
-                                console.log('File saved via pywebview API');
-                            }).catch(err => {
-                                console.error('Pywebview save error:', err);
-                                // Fallback to standard download
-                                downloadBlobStandard(blob, filename);
-                            });
+                        reader.onloadend = async function() {
+                            try {
+                                const base64data = reader.result.split(',')[1];
+                                const result = await window.pywebview.api.save_file(filename, base64data);
+                                if (result && result.success) {
+                                    console.log('File saved successfully:', result.path);
+                                } else {
+                                    console.log('File save cancelled or failed');
+                                }
+                            } catch (err) {
+                                console.error('Pywebview API error:', err);
+                                alert('Error saving file: ' + err.message);
+                            }
                         };
                         reader.readAsDataURL(blob);
                     } catch (e) {
                         console.error('Pywebview error:', e);
-                        downloadBlobStandard(blob, filename);
+                        alert('Error using WebView API. File not saved.');
                     }
                 } else {
+                    console.log('PyWebview API not available, using standard download');
                     downloadBlobStandard(blob, filename);
                 }
           
@@ -2147,24 +2164,31 @@
                 const filename = `SMAC_${snr}.json`;
                 
                 // Try pywebview API first, fallback to standard download
-                if (window.pywebview && window.pywebview.api) {
+                if (window.pywebview && window.pywebview.api && window.pywebview.api.save_file) {
+                    console.log('Using pywebview API for SMAC save');
                     try {
                         const reader = new FileReader();
-                        reader.onloadend = function() {
-                            const base64data = reader.result.split(',')[1];
-                            window.pywebview.api.save_file(filename, base64data).then(() => {
-                                console.log('SMAC file saved via pywebview API');
-                            }).catch(err => {
-                                console.error('Pywebview save error:', err);
-                                downloadBlobStandard(blob, filename);
-                            });
+                        reader.onloadend = async function() {
+                            try {
+                                const base64data = reader.result.split(',')[1];
+                                const result = await window.pywebview.api.save_file(filename, base64data);
+                                if (result && result.success) {
+                                    console.log('SMAC file saved successfully:', result.path);
+                                } else {
+                                    console.log('SMAC file save cancelled or failed');
+                                }
+                            } catch (err) {
+                                console.error('Pywebview API error:', err);
+                                alert('Error saving SMAC file: ' + err.message);
+                            }
                         };
                         reader.readAsDataURL(blob);
                     } catch (e) {
                         console.error('Pywebview error:', e);
-                        downloadBlobStandard(blob, filename);
+                        alert('Error using WebView API. SMAC file not saved.');
                     }
                 } else {
+                    console.log('PyWebview API not available, using standard download');
                     downloadBlobStandard(blob, filename);
                 }
           
